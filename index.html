@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ระบบส่งงาน โรงเรียนจอมสุรางค์อุปถัมภ์</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ล็อกหน้าจอให้เลื่อนขึ้นลงได้เท่านั้น */
+    html, body { max-width: 100vw; overflow-x: hidden; font-family: 'DM Sans', sans-serif; -webkit-font-smoothing: antialiased; }
+    .hw-card { background: rgba(255,255,255,0.95); border: 1px solid rgba(0,0,0,0.04); border-radius: 20px; box-shadow: 0 4px 20px rgba(30,64,175,0.05); }
+    .hw-input { background: rgba(118,118,128,0.06); border: none; border-radius: 12px; padding: 12px 16px; font-size: 15px; width: 100%; transition: all 0.2s; }
+    .hw-input:focus { background: rgba(118,118,128,0.12); box-shadow: 0 0 0 2px rgba(30, 64, 175, 0.2); outline: none; }
+    .hw-btn { border-radius: 14px; font-weight: 600; font-size: 17px; padding: 14px; width: 100%; background-color: #1E40AF; color: white; transition: all 0.2s; border: none; }
+    .hw-btn:active { background-color: #153A85; transform: translateY(1px); }
+    .hw-btn:disabled { background-color: #A3B9E2; color: #E5E7EB; cursor: not-allowed; }
+    select.hw-input { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; }
+    .styled-file-input { display: block; width: 100%; font-size: 0.875rem; color: #6B7280; background: #F3F4F6; border: 1px dashed #D1D5DB; border-radius: 12px; padding: 10px; cursor: pointer; }
+  </style>
+</head>
+<body class="min-h-screen bg-[#E6F2FB] text-gray-800">
+  <header class="pt-12 pb-8 px-5 max-w-lg mx-auto flex items-center gap-5">
+    <div class="w-20 h-20 rounded-3xl overflow-hidden p-2 bg-white shadow-lg border border-gray-100 flex items-center justify-center shrink-0">
+      <img src="ตราประจำโรงเรียนจอมสุรางค์อุปถัมภ์.png" alt="โลโก้โรงเรียน" class="w-full h-full object-contain">
+    </div>
+    <div class="flex-1">
+      <h1 class="font-bold text-2xl leading-tight text-gray-900">โรงเรียนจอมสุรางค์อุปถัมภ์</h1>
+      <p class="text-sm mt-0.5 text-blue-700 bg-white px-3 py-1 rounded-full inline-block font-medium shadow-sm">ระบบส่งงานนักเรียนออนไลน์</p>
+    </div>
+  </header>
+
+  <main class="max-w-lg mx-auto px-5 pb-10">
+    <form id="submit-form" class="hw-card p-6 space-y-4">
+      <div>
+        <label class="block text-xs font-semibold mb-2 text-gray-600 uppercase tracking-wide">ระดับชั้น / ห้อง</label> 
+        <select id="classroom" class="hw-input" required> 
+          <option value="">-- เลือกห้อง --</option> 
+          <option value="ม.3/6">ม.3/6</option> 
+          <option value="ม.3/10">ม.3/10</option> 
+          <option value="ม.3/14">ม.3/14</option> 
+        </select>
+      </div>
+      
+      <div class="flex gap-3">
+        <div class="flex-1 w-full overflow-hidden">
+          <label class="block text-xs font-semibold mb-2 text-gray-600 uppercase tracking-wide">ชื่อ - สกุล</label> 
+          <input id="student-name" list="student-list-options" type="text" class="hw-input" placeholder="เลือกชื่อจากรายการ..." required autocomplete="off">
+          <datalist id="student-list-options"></datalist>
+        </div>
+        <div class="w-20 shrink-0">
+          <label class="block text-xs font-semibold mb-2 text-gray-600 uppercase tracking-wide">เลขที่</label> 
+          <input id="student-number" type="number" class="hw-input" placeholder="เลขที่" required min="1">
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold mb-2 text-gray-600 uppercase tracking-wide">ชิ้นงาน</label> 
+        <select id="assignment" class="hw-input" required disabled> 
+          <option value="">-- กำลังโหลดชื่องาน... --</option> 
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-semibold mb-2 text-gray-600 uppercase tracking-wide">ลิงก์ผลงาน</label> 
+        <input id="link-input" type="url" class="hw-input" placeholder="https://...">
+      </div>
+      <div>
+        <label class="block text-xs font-semibold mb-2 text-gray-600 uppercase tracking-wide">แนบไฟล์ภาพหรือไฟล์งาน</label> 
+        <input id="file-input" type="file" class="styled-file-input">
+      </div>
+      <button type="submit" id="submit-btn" class="hw-btn mt-6 transition active:scale-95 disabled:scale-100">ส่งงาน</button>
+    </form>
+  </main>
+
+  <div id="toast" class="fixed top-12 left-1/2 -translate-x-1/2 bg-gray-900/90 text-white px-5 py-3 rounded-2xl shadow-2xl hidden text-sm font-medium z-50 text-center max-w-xs"></div>
+
+  <script>
+    // ⚠️ ใส่ URL ของ Web App ตรงนี้
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx1Yqs9qyIy9KLna7qIDE9b8ARRf5nSN7f2lVnuNj46HpWtxGua-x6pCajIk2jjO6BkJA/exec';
+
+    let allAssignments = [];
+    let allStudents = [];
+
+    async function loadData() {
+      try {
+        const response = await fetch(SCRIPT_URL);
+        const data = await response.json();
+        allAssignments = data.filter(d => d.type === 'assignment');
+        allStudents = data.filter(d => d.type === 'student');
+        
+        // ดึงข้อมูลที่จำไว้ในเครื่องกลับมาแสดง
+        document.getElementById('classroom').value = localStorage.getItem('savedClassroom') || '';
+        document.getElementById('student-name').value = localStorage.getItem('savedStudentName') || '';
+        document.getElementById('student-number').value = localStorage.getItem('savedStudentNumber') || '';
+        
+        renderAssignments();
+        updateStudentDatalist();
+      } catch (e) {
+        showToast('โหลดข้อมูลเริ่มต้นล้มเหลว');
+      }
+    }
+
+    function renderAssignments() {
+      const select = document.getElementById('assignment');
+      if (allAssignments.length === 0) {
+        select.innerHTML = '<option value="">-- ยังไม่มีการสั่งงาน --</option>';
+        select.disabled = true;
+      } else {
+        select.innerHTML = '<option value="">-- เลือกงาน --</option>' + 
+          allAssignments.map(a => `<option value="${a.name}">${a.name}</option>`).join('');
+        select.disabled = false;
+      }
+    }
+
+    function updateStudentDatalist() {
+      const room = document.getElementById('classroom').value;
+      const datalist = document.getElementById('student-list-options');
+      datalist.innerHTML = allStudents.filter(s => s.classroom === room).map(s => `<option value="${s.name}">`).join('');
+    }
+
+    document.getElementById('classroom').addEventListener('change', updateStudentDatalist);
+
+    function showToast(msg) { 
+      const t = document.getElementById('toast'); t.textContent = msg; t.classList.remove('hidden'); setTimeout(() => t.classList.add('hidden'), 5000); 
+    }
+
+    document.getElementById('submit-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fileInput = document.getElementById('file-input');
+      let fileName = '', fileData = '';
+      
+      if (fileInput.files.length > 0) { 
+        const file = fileInput.files[0]; 
+        fileName = file.name; 
+        fileData = await new Promise(r => { 
+          const reader = new FileReader(); 
+          reader.onload = () => r(reader.result); 
+          reader.readAsDataURL(file); 
+        }); 
+      }
+      
+      const record = { 
+        type: 'submission',
+        student_name: document.getElementById('student-name').value.trim(), 
+        student_number: document.getElementById('student-number').value.trim(),
+        classroom: document.getElementById('classroom').value, 
+        assignment: document.getElementById('assignment').value, 
+        link: document.getElementById('link-input').value.trim(), 
+        file_name: fileName, 
+        file_data: fileData, 
+        submitted_date: new Date().toLocaleString('th-TH')
+      };
+      
+      const btn = document.getElementById('submit-btn'); 
+      btn.disabled = true; btn.innerText = 'กำลังส่งข้อมูล...';
+      
+      try {
+        const response = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'create', record: record }) });
+        const result = await response.json();
+        
+        if (result.isOk) { 
+          showToast('ส่งงานเรียบร้อยแล้ว ✓'); 
+          
+          // บันทึกความจำลงเครื่องนักเรียนหลังจากส่งสำเร็จ
+          localStorage.setItem('savedClassroom', document.getElementById('classroom').value);
+          localStorage.setItem('savedStudentName', document.getElementById('student-name').value.trim());
+          localStorage.setItem('savedStudentNumber', document.getElementById('student-number').value.trim());
+          
+          e.target.reset(); // ล้างช่องอัปโหลดไฟล์และลิงก์งานออก
+          
+          // คืนค่า ห้อง ชื่อ เลขที่ ที่จำไว้อัตโนมัติ เพื่อส่งงานชิ้นต่อไปได้ทันที
+          document.getElementById('classroom').value = localStorage.getItem('savedClassroom') || '';
+          document.getElementById('student-name').value = localStorage.getItem('savedStudentName') || '';
+          document.getElementById('student-number').value = localStorage.getItem('savedStudentNumber') || '';
+          
+          updateStudentDatalist(); 
+        } else { 
+          showToast('เกิดข้อผิดพลาด: ' + (result.error || 'เซิร์ฟเวอร์ขัดข้อง')); 
+        }
+      } catch (err) {
+        showToast('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้');
+      } finally {
+        btn.disabled = false; btn.innerText = 'ส่งงาน';
+      }
+    });
+
+    loadData();
+  </script>
+</body>
+</html>

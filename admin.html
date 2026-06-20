@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบจัดการหลังบ้าน (ครูผู้สอน)</title>
+  <title>ระบบหลังบ้าน - ส่งงานครูเกมส์</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
@@ -18,17 +18,17 @@
     .hw-segment { background: rgba(255,255,255,0.6); border-radius: 12px; padding: 4px; display: flex; }
     .hw-tab-btn { flex: 1; border-radius: 9px; padding: 10px 12px; font-size: 13px; font-weight: 500; color: #666; border: none; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; transition: 0.2s;}
     .hw-tab-btn.active { background: #fff; box-shadow: 0 2px 8px rgba(30,64,175,0.08); color: #1E40AF; font-weight: 600; }
+    
+    /* ยกเลิกคลาสimg-fade-radial ของเดิมออกทั้งหมด */
   </style>
 </head>
 <body class="min-h-screen bg-[#E6F2FB] text-gray-800">
   
-  <header class="pt-12 pb-8 px-5 max-w-lg mx-auto flex items-center gap-5">
-    <div class="w-16 h-16 rounded-2xl overflow-hidden p-2 bg-white shadow-md border border-gray-100 flex items-center justify-center">
-      <img src="ตราประจำโรงเรียนจอมสุรางค์อุปถัมภ์.png" alt="โลโก้โรงเรียน" class="w-full h-full object-contain" onerror="this.style.display='none'">
-    </div>
-    <div class="flex-1">
-      <h1 class="font-bold text-xl leading-tight text-gray-900">ระบบจัดการหลังบ้าน</h1>
-      <p class="text-xs text-blue-700 bg-white px-3 py-1 rounded-full inline-block font-medium shadow-sm">แผงควบคุมสำหรับครู</p>
+  <header class="pt-8 pb-6 px-5 max-w-lg mx-auto flex flex-col items-center text-center gap-0">
+    <img src="เกมส์_01.png" alt="โลโก้ครูเกมส์" class="w-36 h-36 object-cover drop-shadow-md" onerror="this.style.display='none'">
+    <div class="-mt-6 z-10">
+      <h1 class="font-bold text-xl leading-tight text-gray-900 drop-shadow-sm">ระบบจัดการหลังบ้าน</h1>
+      <p class="text-xs mt-1 text-blue-700 bg-white px-3 py-1 rounded-full inline-block font-medium shadow-sm">แผงควบคุมสำหรับครูเกมส์</p>
     </div>
   </header>
 
@@ -75,7 +75,6 @@
   </main>
 
   <script>
-    // ⚠️ ใส่ URL Web App ล่าสุดตรงนี้ครับ
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz3CvKgcXVrTSxk8aWvgAJghoZ_EdKIxYwvt7BstBblcv1xwaCt2-c-4HAtOvUPYG7k8g/exec';
 
     let allSubmissions = []; let allAssignments = []; let allStudents = [];
@@ -90,7 +89,6 @@
         allAssignments = data.filter(d => d.type === 'assignment');
         allStudents = data.filter(d => d.type === 'student');
         
-        // อัปเดตตัวกรองห้องและงาน
         const classrooms = [...new Set(allStudents.map(s => s.classroom).filter(c => c && c.trim() !== ''))].sort();
         document.getElementById('filter-classroom').innerHTML = '<option value="">ทุกห้อง</option>' + classrooms.map(c => `<option value="${c}">${c}</option>`).join('');
         document.getElementById('filter-assignment').innerHTML = '<option value="">ทุกงาน</option>' + allAssignments.map(a => `<option value="${a.name}">${a.name}</option>`).join('');
@@ -102,9 +100,7 @@
     function renderReport() {
       const fc = document.getElementById('filter-classroom').value; 
       const fa = document.getElementById('filter-assignment').value;
-      
       let filtered = allSubmissions.filter(d => (!fc || d.classroom === fc) && (!fa || d.assignment === fa));
-      // เรียงจากใหม่ไปเก่า
       filtered.reverse();
 
       const container = document.getElementById('report-content');
@@ -170,7 +166,6 @@
       btn.disabled = false; btn.innerText = 'เพิ่ม';
     });
 
-    // สลับหน้าจอ
     document.querySelectorAll('.hw-segment button').forEach(btn => { 
       btn.addEventListener('click', () => { 
         document.querySelectorAll('.hw-segment button').forEach(b => b.classList.remove('active')); btn.classList.add('active'); 

@@ -1,145 +1,119 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบจัดการหลังบ้าน (ครูผู้สอน)</title>
-  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
-  <style>
-    body { font-family: 'DM Sans', sans-serif; -webkit-font-smoothing: antialiased; }
-    .hw-card { background: rgba(255,255,255,0.95); border: 1px solid rgba(0,0,0,0.04); border-radius: 20px; box-shadow: 0 4px 20px rgba(30,64,175,0.05); }
-    .hw-input { background: rgba(118,118,128,0.06); border: none; border-radius: 12px; padding: 10px 14px; font-size: 14px; width: 100%; transition: all 0.2s; }
-    .hw-input:focus { background: rgba(118,118,128,0.12); box-shadow: 0 0 0 2px rgba(30, 64, 175, 0.2); outline: none; }
-    .hw-list-item { background: #fff; padding: 12px 16px; border-bottom: 0.5px solid rgba(0,0,0,0.04); }
-    .hw-list-item:first-child { border-radius: 16px 16px 0 0; }
-    .hw-list-item:last-child { border-radius: 0 0 16px 16px; border-bottom: none; }
-    select.hw-input { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; }
-    .hw-segment { background: rgba(255,255,255,0.6); border-radius: 12px; padding: 4px; display: flex; }
-    .hw-tab-btn { flex: 1; border-radius: 9px; padding: 10px 12px; font-size: 13px; font-weight: 500; color: #666; border: none; display: flex; align-items: center; justify-content: center; gap: 6px; }
-    .hw-tab-btn.active { background: #fff; box-shadow: 0 2px 8px rgba(30,64,175,0.08); color: #1E40AF; font-weight: 600; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบหลังบ้านครู - โรงเรียนจอมสุรางค์อุปถัมภ์</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', sans-serif; }
+        .nav-tabs .nav-link.active { background-color: #0d6efd; color: white; border-color: #0d6efd; }
+    </style>
 </head>
-<body class="min-h-screen bg-[#E6F2FB] text-gray-800">
-  
-  <header class="pt-12 pb-8 px-5 max-w-lg mx-auto flex items-center gap-5">
-    <div class="w-16 h-16 rounded-2xl overflow-hidden p-2 bg-white shadow-md border border-gray-100 flex items-center justify-center">
-      <img src="ตราประจำโรงเรียนจอมสุรางค์อุปถัมภ์.png" alt="โลโก้โรงเรียน" class="w-full h-full object-contain">
-    </div>
-    <div class="flex-1">
-      <h1 class="font-bold text-xl leading-tight text-gray-900">ระบบจัดการของครู</h1>
-      <p class="text-xs text-blue-700 bg-white px-3 py-1 rounded-full inline-block font-medium shadow-sm">แดชบอร์ดติดตามงาน</p>
-    </div>
-  </header>
+<body>
+<div class="container my-5">
+    <h2 class="mb-4 text-center text-dark">📊 ระบบจัดการข้อมูลหลังบ้านครู</h2>
+    
+    <ul class="nav nav-tabs mb-4" id="adminTab" role="tablist">
+        <li class="nav-item"><button class="nav-link active" id="sub-tab" data-bs-toggle="tab" data-bs-target="#sub-panel">ประวัติการส่งงาน</button></li>
+        <li class="nav-item"><button class="nav-link" id="asg-tab" data-bs-toggle="tab" data-bs-target="#asg-panel">จัดการชื่องาน</button></li>
+        <li class="nav-item"><button class="nav-link" id="std-tab" data-bs-toggle="tab" data-bs-target="#std-panel">จัดการรายชื่อนักเรียน</button></li>
+    </ul>
 
-  <nav class="max-w-lg mx-auto px-5 mb-5">
-    <div class="hw-segment flex">
-      <button class="hw-tab-btn active" data-tab="report"><i data-lucide="bar-chart-3" style="width:16px;height:16px;"></i> รายงาน</button> 
-      <button class="hw-tab-btn" data-tab="manage-assignments"><i data-lucide="clipboard-list" style="width:16px;height:16px;"></i> งาน</button> 
-      <button class="hw-tab-btn" data-tab="manage-students"><i data-lucide="users" style="width:16px;height:16px;"></i> นักเรียน</button>
-    </div>
-  </nav>
-
-  <main class="max-w-lg mx-auto px-5 pb-10">
-    <section id="tab-report">
-      <div class="flex gap-2 mb-4">
-        <select id="filter-classroom" class="hw-input flex-1 bg-white shadow-sm"> 
-          <option value="">ทุกห้อง</option> 
-          <option value="ม.3/6">ม.3/6</option> 
-          <option value="ม.3/10">ม.3/10</option> 
-          <option value="ม.3/14">ม.3/14</option> 
-        </select> 
-        <select id="filter-assignment" class="hw-input flex-1 bg-white shadow-sm"> 
-          <option value="">ทุกงาน</option> 
-        </select>
-      </div>
-      <div id="report-content" class="space-y-4">กำลังโหลดข้อมูล...</div>
-    </section>
-
-    <section id="tab-manage-assignments" class="hidden">
-      <div class="hw-card p-5 space-y-4 bg-white mb-4">
-        <h3 class="font-bold text-gray-800 flex items-center gap-2"><i data-lucide="plus-circle" class="text-blue-500"></i> เพิ่มงานใหม่</h3>
-        <div class="flex gap-2"><input id="new-assignment" type="text" class="hw-input flex-1" placeholder="ชื่องานใหม่"><button id="add-assignment-btn" class="bg-blue-500 text-white px-5 rounded-xl text-xs font-semibold">เพิ่ม</button></div>
-      </div>
-      <div id="assignment-list" class="rounded-2xl overflow-hidden shadow-sm border border-gray-100"></div>
-    </section>
-
-    <section id="tab-manage-students" class="hidden">
-      <div class="hw-card p-5 space-y-4 bg-white mb-4">
-        <h3 class="font-bold text-gray-800 flex items-center gap-2"><i data-lucide="user-plus" class="text-green-500"></i> เพิ่มรายชื่อนักเรียน</h3>
-        <div class="flex gap-2">
-          <input id="new-student" type="text" class="hw-input flex-1" placeholder="ชื่อ - สกุล"> 
-          <select id="new-student-class" class="hw-input w-28"><option value="ม.3/6">ม.3/6</option><option value="ม.3/10">ม.3/10</option><option value="ม.3/14">ม.3/14</option></select> 
-          <button id="add-student-btn" class="bg-green-500 text-white px-5 rounded-xl text-xs font-semibold">เพิ่ม</button>
+    <div class="tab-content bg-white p-4 border rounded shadow-sm">
+        <div class="tab-pane fade show active" id="sub-panel">
+            <h4>รายการส่งงานของนักเรียน</h4>
+            <div class="table-responsive mt-3">
+                <table class="table table-striped table-bordered align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>วันเวลาที่ส่ง</th><th>ห้อง</th><th>เลขที่</th><th>ชื่อ-สกุล</th><th>งานที่ส่ง</th><th>ลิงก์ผลงาน</th><th>ไฟล์ใน Drive</th>
+                        </tr>
+                    </thead>
+                    <tbody id="subTableBody"><tr><td colspan="7" class="text-center text-muted">กำลังโหลดข้อมูล...</td></tr></tbody>
+                </table>
+            </div>
         </div>
-      </div>
-      <div id="student-list" class="rounded-2xl overflow-hidden shadow-sm border border-gray-100"></div>
-    </section>
-  </main>
 
-  <div id="toast" class="fixed top-12 left-1/2 -translate-x-1/2 bg-gray-900/90 text-white px-5 py-3 rounded-2xl shadow-2xl hidden text-sm font-medium z-50"></div>
+        <div class="tab-pane fade" id="asg-panel">
+            <h4>เพิ่มภาระงาน/ชิ้นงานใหม่</h4>
+            <form id="addAsgForm" class="row g-3 my-2">
+                <div class="col-sm-9"><input type="text" class="form-control" id="asgName" placeholder="เช่น ใบงานที่ 1 เรื่อง เทคโนโลยี" required></div>
+                <div class="col-sm-3"><button type="submit" class="btn btn-success w-100">➕ เพิ่มภาระงาน</button></div>
+            </form>
+            <table class="table table-bordered mt-3"><thead class="table-light"><tr><th>ชื่องาน</th><th width="10%">จัดการ</th></tr></thead><tbody id="asgTableBody"></tbody></table>
+        </div>
 
-  <script>
-    // ⚠️ ใส่ URL ของ Web App ตรงนี้
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx1Yqs9qyIy9KLna7qIDE9b8ARRf5nSN7f2lVnuNj46HpWtxGua-x6pCajIk2jjO6BkJA/exec';
+        <div class="tab-pane fade" id="std-panel">
+            <h4>เพิ่มรายชื่อนักเรียนเข้าระบบ</h4>
+            <form id="addStdForm" class="row g-3 my-2">
+                <div class="col-sm-5"><input type="text" class="form-control" id="stdName" placeholder="ชื่อ - นามสกุล" required></div>
+                <div class="col-sm-4"><input type="text" class="form-control" id="stdClass" placeholder="เช่น ม.1/1" required></div>
+                <div class="col-sm-3"><button type="submit" class="btn btn-success w-100">➕ เพิ่มนักเรียน</button></div>
+            </form>
+            <table class="table table-bordered mt-3"><thead class="table-light"><tr><th>ชื่อ-นามสกุล</th><th>ห้องเรียน</th><th width="10%">จัดการ</th></tr></thead><tbody id="stdTableBody"></tbody></table>
+        </div>
+    </div>
+</div>
 
-    let allSubmissions = []; let allAssignments = []; let allStudents = [];
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // ⚠️ นำ URL Web App ล่าสุดมาใส่ที่นี่เช่นกัน
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyrGfnkhLu9vYgOy67Tj4UWk1eDryHZI1mLzxGwT880fwK-1oLdnDRH8K4csT229SAa/exec';
 
-    async function loadAllData() {
-      lucide.createIcons();
-      try {
-        const response = await fetch(SCRIPT_URL); const data = await response.json();
-        allSubmissions = data.filter(d => d.type === 'submission');
-        allAssignments = data.filter(d => d.type === 'assignment');
-        allStudents = data.filter(d => d.type === 'student');
-        renderReport(); renderAssignmentDropdown(); renderAssignmentList(); renderStudentList();
-      } catch(e) { document.getElementById('report-content').innerText = 'ไม่สามารถดึงข้อมูลได้'; }
+    function loadAllData() {
+        fetch(WEB_APP_URL)
+        .then(res => res.json())
+        .then(data => {
+            const subBody = document.getElementById('subTableBody');
+            const asgBody = document.getElementById('asgTableBody');
+            const stdBody = document.getElementById('stdTableBody');
+            
+            subBody.innerHTML = ''; asgBody.innerHTML = ''; stdBody.innerHTML = '';
+
+            let hasSub = false;
+            data.forEach(item => {
+                if(item.type === 'submission') {
+                    hasSub = true;
+                    subBody.innerHTML += `<tr>
+                        <td>${item.submitted_date}</td><td>${item.classroom}</td><td>${item.student_number}</td><td>${item.student_name}</td><td>${item.assignment}</td>
+                        <td>${item.link ? `<a href="${item.link}" target="_blank" class="btn btn-sm btn-outline-primary">เปิดลิงก์</a>` : '-'}</td>
+                        <td>${item.file_url ? `<a href="${item.file_url}" target="_blank" class="btn btn-sm btn-info text-white">เปิดดูรูป</a>` : '-'}</td>
+                    </tr>`;
+                } else if(item.type === 'assignment') {
+                    asgBody.innerHTML += `<tr><td>${item.name}</td><td><button class="btn btn-danger btn-sm" onclick="deleteItem('assignments', '${item.id}')">ลบ</button></td></tr>`;
+                } else if(item.type === 'student') {
+                    stdBody.innerHTML += `<tr><td>${item.name}</td><td>${item.classroom}</td><td><button class="btn btn-danger btn-sm" onclick="deleteItem('students', '${item.id}')">ลบ</button></td></tr>`;
+                }
+            });
+            if(!hasSub) subBody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">ยังไม่มีประวัติการส่งงาน</td></tr>';
+        }).catch(err => alert("โหลดข้อมูลล้มเหลว"));
     }
 
-    function renderAssignmentDropdown() { document.getElementById('filter-assignment').innerHTML = '<option value="">ทุกงาน</option>' + allAssignments.map(a => `<option value="${a.name}">${a.name}</option>`).join(''); }
+    // เพิ่มภาระงาน
+    document.getElementById('addAsgForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        sendCreate({ type: 'assignment', name: document.getElementById('asgName').value });
+    });
 
-    function renderReport() {
-      const fc = document.getElementById('filter-classroom').value; const fa = document.getElementById('filter-assignment').value;
-      let filtered = allSubmissions.filter(d => (!fc || d.classroom === fc) && (!fa || d.assignment === fa));
-      filtered.sort((a, b) => parseInt(a.student_number) - parseInt(b.student_number));
+    // เพิ่มรายชื่อนักเรียน
+    document.getElementById('addStdForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        sendCreate({ type: 'student', name: document.getElementById('stdName').value, classroom: document.getElementById('stdClass').value });
+    });
 
-      const container = document.getElementById('report-content');
-      if (filtered.length === 0) { container.innerHTML = '<p class="text-center py-6 text-gray-400 text-sm">ไม่มีข้อมูลการส่งงาน</p>'; return; }
-
-      container.innerHTML = filtered.map(item => `
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 text-sm space-y-2 hw-card">
-          <div class="flex justify-between items-start gap-2 font-bold">
-            <span class="text-gray-900 leading-snug">
-              <span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-md text-xs mr-1">เลขที่ ${item.student_number}</span> 
-              ${item.student_name} <span class="text-gray-500 font-normal">(${item.classroom})</span>
-            </span>
-            <span class="text-blue-600 text-right whitespace-nowrap">${item.assignment}</span>
-          </div>
-          <div class="text-gray-400 text-xs flex items-center gap-1.5"><i data-lucide="calendar" style="width:12px;height:12px;"></i> ${item.submitted_date}</div>
-          ${item.link ? `<div class="text-xs flex items-center gap-1.5"><i data-lucide="link" style="width:12px;height:12px;"></i> ลิงก์: <a href="${item.link}" target="_blank" class="text-blue-500 underline break-all">${item.link}</a></div>` : ''}
-          
-          ${item.file_url ? 
-            `<div class="mt-2">
-              <a href="${item.file_url}" target="_blank" class="text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-xl inline-flex items-center gap-1.5 font-medium transition text-xs whitespace-nowrap"><i data-lucide="file-text" style="width:14px;height:14px;"></i> ${item.file_name || 'เปิดไฟล์แนบ'}</a>
-             </div>` : ''
-          }
-        </div>`).join('');
-      lucide.createIcons();
+    function sendCreate(record) {
+        fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'create', record: record }) })
+        .then(res => res.json()).then(res => { if(res.isOk) { alert("บันทึกข้อมูลเรียบร้อย!"); loadAllData(); document.getElementById('addAsgForm').reset(); document.getElementById('addStdForm').reset(); } else { alert("เกิดข้อผิดพลาด"); } });
     }
 
-    function renderAssignmentList() { const container = document.getElementById('assignment-list'); if(allAssignments.length === 0) { container.innerHTML = '<div class="p-4 text-center text-gray-400 text-sm bg-white">ไม่มีข้อมูลงาน</div>'; return; } container.innerHTML = allAssignments.map(a => `<div class="hw-list-item flex justify-between items-center"><span class="text-sm font-medium text-gray-900">${a.name}</span><button type="button" onclick="removeItem('assignments', '${a.id}')" class="text-red-500 text-xs font-semibold px-2 py-1 bg-red-50 rounded-lg flex items-center gap-1"><i data-lucide="trash-2" style="width:14px;height:14px;"></i> ลบ</button></div>`).join(''); lucide.createIcons(); }
-    function renderStudentList() { const container = document.getElementById('student-list'); if(allStudents.length === 0) { container.innerHTML = '<div class="p-4 text-center text-gray-400 text-sm bg-white">ไม่มีข้อมูลนักเรียน</div>'; return; } container.innerHTML = allStudents.map(s => `<div class="hw-list-item flex justify-between items-center"><span class="text-sm font-medium text-gray-900">${s.name} <span class="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full ml-2">${s.classroom}</span></span><button type="button" onclick="removeItem('students', '${s.id}')" class="text-red-500 text-xs font-semibold px-2 py-1 bg-red-50 rounded-lg flex items-center gap-1"><i data-lucide="trash-2" style="width:14px;height:14px;"></i> ลบ</button></div>`).join(''); lucide.createIcons(); }
-    
-    window.removeItem = async function(type, id) { if(!id || id === 'undefined') return; if(confirm('ยืนยันการลบข้อมูลนี้?')) { showToast('กำลังลบข้อมูล...'); try { const response = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'delete', type: type, id: id }) }); const result = await response.json(); if(result.isOk) { loadAllData(); } } catch(e) { alert('ไม่สามารถเชื่อมต่อได้'); } } };
-    document.getElementById('add-assignment-btn').addEventListener('click', async () => { const input = document.getElementById('new-assignment'); if (!input.value.trim()) return; const btn = document.getElementById('add-assignment-btn'); btn.disabled = true; try { await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'create', record: { type: 'assignment', name: input.value.trim() } }) }); input.value = ''; showToast('เพิ่มงานเรียบร้อย'); loadAllData(); } catch(e) {} btn.disabled = false; });
-    document.getElementById('add-student-btn').addEventListener('click', async () => { const nameEl = document.getElementById('new-student'); const classEl = document.getElementById('new-student-class'); if (!nameEl.value.trim()) return; const btn = document.getElementById('add-student-btn'); btn.disabled = true; try { await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'create', record: { type: 'student', name: nameEl.value.trim(), classroom: classEl.value } }) }); nameEl.value = ''; showToast('เพิ่มรายชื่อเรียบร้อย'); loadAllData(); } catch(e) {} btn.disabled = false; });
-    function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.remove('hidden'); setTimeout(() => t.classList.add('hidden'), 3000); }
-    
-    document.querySelectorAll('.hw-segment button').forEach(btn => { btn.addEventListener('click', () => { document.querySelectorAll('.hw-segment button').forEach(b => b.classList.remove('active')); btn.classList.add('active'); ['report','manage-assignments','manage-students'].forEach(t => document.getElementById('tab-' + t).classList.add('hidden')); document.getElementById('tab-' + btn.dataset.tab).classList.remove('hidden'); }); });
-    document.getElementById('filter-classroom').addEventListener('change', renderReport); document.getElementById('filter-assignment').addEventListener('change', renderReport);
-    
-    loadAllData();
-  </script>
+    function deleteItem(type, id) {
+        if(!confirm("ยืนยันการลบแถวข้อมูลนี้? (การลบในแถวนี้จะมีผลกับตารางใน Sheet)")) return;
+        fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'delete', type: type, id: id }) })
+        .then(res => res.json()).then(res => { if(res.isOk) { alert("ลบข้อมูลสำเร็จ!"); loadAllData(); } else { alert("ไม่สามารถลบได้"); } });
+    }
+
+    window.onload = loadAllData;
+</script>
 </body>
 </html>

@@ -1,190 +1,237 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>ระบบส่งงาน โรงเรียนจอมสุรางค์อุปถัมภ์</title>
-  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    /* ล็อกหน้าจอให้เลื่อนขึ้นลงได้เท่านั้น */
-    html, body { max-width: 100vw; overflow-x: hidden; font-family: 'DM Sans', sans-serif; -webkit-font-smoothing: antialiased; }
-    .hw-card { background: rgba(255,255,255,0.95); border: 1px solid rgba(0,0,0,0.04); border-radius: 20px; box-shadow: 0 4px 20px rgba(30,64,175,0.05); }
-    .hw-input { background: rgba(118,118,128,0.06); border: none; border-radius: 12px; padding: 12px 16px; font-size: 15px; width: 100%; transition: all 0.2s; }
-    .hw-input:focus { background: rgba(118,118,128,0.12); box-shadow: 0 0 0 2px rgba(30, 64, 175, 0.2); outline: none; }
-    .hw-btn { border-radius: 14px; font-weight: 600; font-size: 17px; padding: 14px; width: 100%; background-color: #1E40AF; color: white; transition: all 0.2s; border: none; }
-    .hw-btn:active { background-color: #153A85; transform: translateY(1px); }
-    .hw-btn:disabled { background-color: #A3B9E2; color: #E5E7EB; cursor: not-allowed; }
-    select.hw-input { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; }
-    .styled-file-input { display: block; width: 100%; font-size: 0.875rem; color: #6B7280; background: #F3F4F6; border: 1px dashed #D1D5DB; border-radius: 12px; padding: 10px; cursor: pointer; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบส่งงานนักเรียน - โรงเรียนจอมสุรางค์อุปถัมภ์</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .card { border: none; border-top: 5px solid #0056b3; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .logo-img { max-height: 100px; display: block; margin: 0 auto 15px; }
+        .loading-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.8); z-index:9999; justify-content:center; align-items:center; flex-direction:column; }
+    </style>
 </head>
-<body class="min-h-screen bg-[#E6F2FB] text-gray-800">
-  <header class="pt-12 pb-8 px-5 max-w-lg mx-auto flex items-center gap-5">
-    <div class="w-20 h-20 rounded-3xl overflow-hidden p-2 bg-white shadow-lg border border-gray-100 flex items-center justify-center shrink-0">
-      <img src="ตราประจำโรงเรียนจอมสุรางค์อุปถัมภ์.png" alt="โลโก้โรงเรียน" class="w-full h-full object-contain">
-    </div>
-    <div class="flex-1">
-      <h1 class="font-bold text-2xl leading-tight text-gray-900">โรงเรียนจอมสุรางค์อุปถัมภ์</h1>
-      <p class="text-sm mt-0.5 text-blue-700 bg-white px-3 py-1 rounded-full inline-block font-medium shadow-sm">ระบบส่งงานนักเรียนออนไลน์</p>
-    </div>
-  </header>
+<body>
 
-  <main class="max-w-lg mx-auto px-5 pb-10">
-    <form id="submit-form" class="hw-card p-6 space-y-4">
-      <div>
-        <label class="block text-xs font-semibold mb-2 text-gray-600 uppercase tracking-wide">ระดับชั้น / ห้อง</label> 
-        <select id="classroom" class="hw-input" required> 
-          <option value="">-- เลือกห้อง --</option> 
-          <option value="ม.3/6">ม.3/6</option> 
-          <option value="ม.3/10">ม.3/10</option> 
-          <option value="ม.3/14">ม.3/14</option> 
-        </select>
-      </div>
-      
-      <div class="flex gap-3">
-        <div class="flex-1 w-full overflow-hidden">
-          <label class="block text-xs font-semibold mb-2 text-gray-600 uppercase tracking-wide">ชื่อ - สกุล</label> 
-          <input id="student-name" list="student-list-options" type="text" class="hw-input" placeholder="เลือกชื่อจากรายการ..." required autocomplete="off">
-          <datalist id="student-list-options"></datalist>
+<div class="loading-overlay" id="loading">
+    <div class="spinner-border text-primary mb-3" role="status"></div>
+    <h5 id="loadingText">กำลังประมวลผลและส่งงาน กรุณาอย่าปิดหน้าต่างนี้...</h5>
+</div>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7">
+            <div class="card p-4">
+                <img src="ตราประจำโรงเรียนจอมสุรางค์อุปถัมภ์.png" alt="Logo" class="logo-img" onerror="this.style.display='none'">
+                <h4 class="text-center text-primary mb-4">ระบบส่งงานออนไลน์</h4>
+                
+                <form id="submissionForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">1. เลือก ระดับชั้น/ห้องเรียน</label>
+                        <select class="form-select" id="classroom" required>
+                            <option value="">-- เลือกห้องเรียน --</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">2. เลือก ชื่อ-นามสกุล ของนักเรียน</label>
+                        <select class="form-select" id="studentName" required disabled>
+                            <option value="">-- กรุณาเลือกห้องเรียนก่อน --</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">3. เลขที่</label>
+                        <input type="text" class="form-select" id="studentNumber" readonly placeholder="ระบบจะกรอกเลขให้อัตโนมัติ">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">4. เลือก ชิ้นงาน/ภาระงาน</label>
+                        <select class="form-select" id="assignment" required>
+                            <option value="">-- เลือกชิ้นงาน --</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">5. ลิงก์ผลงาน (ถ้ามี เช่น ลิงก์ Canva/YouTube)</label>
+                        <input type="url" class="form-control" id="workLink" placeholder="https://...">
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">6. แนบไฟล์ภาพ หรือ ไฟล์งาน (ระบบจะย่อขนาดให้อัตโนมัติ)</label>
+                        <input type="file" class="form-control" id="fileInput" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx">
+                        <small class="text-muted" id="compressStatus"></small>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-2.5 fw-bold" id="submitBtn">📤 กดส่งงานบันทึกข้อมูล</button>
+                </form>
+            </div>
         </div>
-        <div class="w-20 shrink-0">
-          <label class="block text-xs font-semibold mb-2 text-gray-600 uppercase tracking-wide">เลขที่</label> 
-          <input id="student-number" type="number" class="hw-input" placeholder="เลขที่" required min="1">
-        </div>
-      </div>
+    </div>
+</div>
 
-      <div>
-        <label class="block text-xs font-semibold mb-2 text-gray-600 uppercase tracking-wide">ชิ้นงาน</label> 
-        <select id="assignment" class="hw-input" required disabled> 
-          <option value="">-- กำลังโหลดชื่องาน... --</option> 
-        </select>
-      </div>
-      <div>
-        <label class="block text-xs font-semibold mb-2 text-gray-600 uppercase tracking-wide">ลิงก์ผลงาน</label> 
-        <input id="link-input" type="url" class="hw-input" placeholder="https://...">
-      </div>
-      <div>
-        <label class="block text-xs font-semibold mb-2 text-gray-600 uppercase tracking-wide">แนบไฟล์ภาพหรือไฟล์งาน</label> 
-        <input id="file-input" type="file" class="styled-file-input">
-      </div>
-      <button type="submit" id="submit-btn" class="hw-btn mt-6 transition active:scale-95 disabled:scale-100">ส่งงาน</button>
-    </form>
-  </main>
-
-  <div id="toast" class="fixed top-12 left-1/2 -translate-x-1/2 bg-gray-900/90 text-white px-5 py-3 rounded-2xl shadow-2xl hidden text-sm font-medium z-50 text-center max-w-xs"></div>
-
-  <script>
-    // ⚠️ ใส่ URL ของ Web App ตรงนี้
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx1Yqs9qyIy9KLna7qIDE9b8ARRf5nSN7f2lVnuNj46HpWtxGua-x6pCajIk2jjO6BkJA/exec';
-
-    let allAssignments = [];
+<script>
+    // ⚠️ ครูนำ URL Web App ล่าสุดมาใส่ที่นี่
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyrGfnkhLu9vYgOy67Tj4UWk1eDryHZI1mLzxGwT880fwK-1oLdnDRH8K4csT229SAa/exec';
+    
     let allStudents = [];
+    let compressedFileData = '';
+    let compressedFileName = '';
 
-    async function loadData() {
-      try {
-        const response = await fetch(SCRIPT_URL);
-        const data = await response.json();
-        allAssignments = data.filter(d => d.type === 'assignment');
-        allStudents = data.filter(d => d.type === 'student');
-        
-        // ดึงข้อมูลที่จำไว้ในเครื่องกลับมาแสดง
-        document.getElementById('classroom').value = localStorage.getItem('savedClassroom') || '';
-        document.getElementById('student-name').value = localStorage.getItem('savedStudentName') || '';
-        document.getElementById('student-number').value = localStorage.getItem('savedStudentNumber') || '';
-        
-        renderAssignments();
-        updateStudentDatalist();
-      } catch (e) {
-        showToast('โหลดข้อมูลเริ่มต้นล้มเหลว');
-      }
-    }
+    // โหลดข้อมูลเริ่มต้นดึงแบบความเร็วสูง (?type=init)
+    window.addEventListener('DOMContentLoaded', () => {
+        showLoading("กำลังโหลดรายชื่อและภาระงาน...");
+        fetch(`${WEB_APP_URL}?type=init`)
+            .then(res => res.json())
+            .then(data => {
+                hideLoading();
+                const assignmentSelect = document.getElementById('assignment');
+                const classroomSelect = document.getElementById('classroom');
+                
+                const classrooms = new Set();
+                
+                data.forEach(item => {
+                    if (item.type === 'assignment') {
+                        let opt = document.createElement('option');
+                        opt.value = item.name;
+                        opt.textContent = item.name;
+                        assignmentSelect.appendChild(opt);
+                    } else if (item.type === 'student') {
+                        allStudents.push(item);
+                        classrooms.add(item.classroom);
+                    }
+                });
 
-    function renderAssignments() {
-      const select = document.getElementById('assignment');
-      if (allAssignments.length === 0) {
-        select.innerHTML = '<option value="">-- ยังไม่มีการสั่งงาน --</option>';
-        select.disabled = true;
-      } else {
-        select.innerHTML = '<option value="">-- เลือกงาน --</option>' + 
-          allAssignments.map(a => `<option value="${a.name}">${a.name}</option>`).join('');
-        select.disabled = false;
-      }
-    }
-
-    function updateStudentDatalist() {
-      const room = document.getElementById('classroom').value;
-      const datalist = document.getElementById('student-list-options');
-      datalist.innerHTML = allStudents.filter(s => s.classroom === room).map(s => `<option value="${s.name}">`).join('');
-    }
-
-    document.getElementById('classroom').addEventListener('change', updateStudentDatalist);
-
-    function showToast(msg) { 
-      const t = document.getElementById('toast'); t.textContent = msg; t.classList.remove('hidden'); setTimeout(() => t.classList.add('hidden'), 5000); 
-    }
-
-    document.getElementById('submit-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const fileInput = document.getElementById('file-input');
-      let fileName = '', fileData = '';
-      
-      if (fileInput.files.length > 0) { 
-        const file = fileInput.files[0]; 
-        fileName = file.name; 
-        fileData = await new Promise(r => { 
-          const reader = new FileReader(); 
-          reader.onload = () => r(reader.result); 
-          reader.readAsDataURL(file); 
-        }); 
-      }
-      
-      const record = { 
-        type: 'submission',
-        student_name: document.getElementById('student-name').value.trim(), 
-        student_number: document.getElementById('student-number').value.trim(),
-        classroom: document.getElementById('classroom').value, 
-        assignment: document.getElementById('assignment').value, 
-        link: document.getElementById('link-input').value.trim(), 
-        file_name: fileName, 
-        file_data: fileData, 
-        submitted_date: new Date().toLocaleString('th-TH')
-      };
-      
-      const btn = document.getElementById('submit-btn'); 
-      btn.disabled = true; btn.innerText = 'กำลังส่งข้อมูล...';
-      
-      try {
-        const response = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'create', record: record }) });
-        const result = await response.json();
-        
-        if (result.isOk) { 
-          showToast('ส่งงานเรียบร้อยแล้ว ✓'); 
-          
-          // บันทึกความจำลงเครื่องนักเรียนหลังจากส่งสำเร็จ
-          localStorage.setItem('savedClassroom', document.getElementById('classroom').value);
-          localStorage.setItem('savedStudentName', document.getElementById('student-name').value.trim());
-          localStorage.setItem('savedStudentNumber', document.getElementById('student-number').value.trim());
-          
-          e.target.reset(); // ล้างช่องอัปโหลดไฟล์และลิงก์งานออก
-          
-          // คืนค่า ห้อง ชื่อ เลขที่ ที่จำไว้อัตโนมัติ เพื่อส่งงานชิ้นต่อไปได้ทันที
-          document.getElementById('classroom').value = localStorage.getItem('savedClassroom') || '';
-          document.getElementById('student-name').value = localStorage.getItem('savedStudentName') || '';
-          document.getElementById('student-number').value = localStorage.getItem('savedStudentNumber') || '';
-          
-          updateStudentDatalist(); 
-        } else { 
-          showToast('เกิดข้อผิดพลาด: ' + (result.error || 'เซิร์ฟเวอร์ขัดข้อง')); 
-        }
-      } catch (err) {
-        showToast('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้');
-      } finally {
-        btn.disabled = false; btn.innerText = 'ส่งงาน';
-      }
+                Array.from(classrooms).sort().forEach(cls => {
+                    let opt = document.createElement('option');
+                    opt.value = cls;
+                    opt.textContent = cls;
+                    classroomSelect.appendChild(opt);
+                });
+            }).catch(err => { hideLoading(); alert("เกิดข้อผิดพลาดในการเชื่อมต่อระบบฐานข้อมูล"); });
     });
 
-    loadData();
-  </script>
+    // เลือกห้องเรียนแล้วกรองชื่อ
+    document.getElementById('classroom').addEventListener('change', function() {
+        const cls = this.value;
+        const studentSelect = document.getElementById('studentName');
+        studentSelect.innerHTML = '<option value="">-- เลือกชื่อ-นามสกุล --</option>';
+        document.getElementById('studentNumber').value = '';
+        
+        if(!cls) { studentSelect.disabled = true; return; }
+        
+        const filtered = allStudents.filter(s => s.classroom === cls)
+                                    .sort((a,b) => a.name.localeCompare(b.name, 'th'));
+        
+        filtered.forEach((std, index) => {
+            let opt = document.createElement('option');
+            opt.value = std.name;
+            opt.textContent = std.name;
+            opt.dataset.num = index + 1; 
+            studentSelect.appendChild(opt);
+        });
+        studentSelect.disabled = false;
+    });
+
+    // ดึงเลขที่อัตโนมัติเมื่อเลือกชื่อ
+    document.getElementById('studentName').addEventListener('change', function() {
+        const opt = this.options[this.selectedIndex];
+        document.getElementById('studentNumber').value = opt.dataset.num || '';
+    });
+
+    // 💡 ระบบบีบอัดรูปภาพอัจฉริยะฝั่งนักเรียน ป้องกันระบบหนาแน่นถาวร
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+        const file = e.target.target || this.files[0];
+        if(!file) return;
+        
+        const statusEl = document.getElementById('compressStatus');
+        
+        if (file.type.match('image.*')) {
+            statusEl.textContent = "กำลังบีบอัดรูปภาพให้เหมาะสมกับระบบ...";
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 1200;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height && width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                    else if (height > MAX_WIDTH) { width *= MAX_WIDTH / height; height = MAX_WIDTH; }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    compressedFileData = canvas.toDataURL('image/jpeg', 0.75); // บีบอัดเหลือ 75% ชัดเจนแต่ไฟล์เล็กลง 10 เท่า
+                    compressedFileName = file.name.substring(0, file.name.lastIndexOf('.')) + '.jpg';
+                    statusEl.textContent = "⚡ บีบอัดรูปภาพเสร็จสิ้น! ไฟล์พร้อมส่งความเร็วสูง";
+                    statusEl.className = "text-success";
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        } else {
+            // ไฟล์ประเภทอื่นๆ ที่ไม่ใช่รูปภาพ (เช่น PDF, Word) ให้ส่งแบบปกติ
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                compressedFileData = event.target.result;
+                compressedFileName = file.name;
+                statusEl.textContent = "ไฟล์เอกสารพร้อมส่ง";
+                statusEl.className = "text-info";
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // ส่งข้อมูล
+    document.getElementById('submissionForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        showLoading("กำลังบันทึกข้อมูลลงตารางและส่งไฟล์... กรุณารอสักครู่");
+
+        const now = new Date();
+        const submittedDate = now.toLocaleDateString('th-TH') + ' ' + now.toLocaleTimeString('th-TH');
+
+        const payload = {
+            action: 'create',
+            record: {
+                type: 'submission',
+                submitted_date: submittedDate,
+                classroom: document.getElementById('classroom').value,
+                student_number: document.getElementById('studentNumber').value,
+                student_name: document.getElementById('studentName').value,
+                assignment: document.getElementById('assignment').value,
+                link: document.getElementById('workLink').value,
+                file_data: compressedFileData,
+                file_name: compressedFileName
+            }
+        };
+
+        fetch(WEB_APP_URL, {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(res => {
+            hideLoading();
+            if(res.isOk) {
+                alert("🎉 ส่งงานสำเร็จเรียบร้อยแล้วค่ะ ข้อมูลถูกบันทึกแล้ว!");
+                document.getElementById('submissionForm').reset();
+                document.getElementById('studentName').disabled = true;
+                document.getElementById('compressStatus').textContent = '';
+                compressedFileData = ''; compressedFileName = '';
+            } else {
+                alert("❌ เกิดข้อผิดพลาด: " + (res.error || "ระบบหนาแน่น กรุณากดส่งใหม่อีกครั้ง"));
+            }
+        })
+        .catch(err => { hideLoading(); alert("❌ ระบบคิวยังหนาแน่นอยู่ กรุณารอสักครู่แล้วกดส่งใหม่อีกครั้ง"); });
+    });
+
+    function showLoading(text) { document.getElementById('loadingText').textContent = text; document.getElementById('loading').style.display = 'flex'; }
+    function hideLoading() { document.getElementById('loading').style.style.display = 'none'; }
+</script>
 </body>
 </html>

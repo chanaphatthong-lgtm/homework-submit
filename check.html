@@ -98,7 +98,7 @@
   <div id="toast" class="fixed top-12 left-1/2 -translate-x-1/2 bg-gray-900/90 text-white px-5 py-3 rounded-2xl shadow-2xl hidden text-sm font-medium z-50 text-center max-w-xs w-full transition-opacity duration-300"></div>
 
   <script>
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbysycik2rVL-mmKfCAjPFXVvcaRXkNxVBUViv8g-6Zc6yMv9msXcuLGWklIg1z5_dwd/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzbMlOfoZyl0g4DkFBl1HieIVtY3hL5CPm9bs2VCvK9xlscLdUPwQJrpfsEsAfEKc2O1w/exec';
     let allStudents = [];
 
     async function loadInitialData() {
@@ -160,43 +160,54 @@
           
           const listContainer = document.getElementById('assignment-status-list');
           
-          listContainer.innerHTML = result.data.map(item => {
-            let statusHTML = '';
-            let scoreHTML = '';
+          if(!result.data || result.data.length === 0) {
+            listContainer.innerHTML = `
+              <div class="hw-card p-6 text-center text-gray-500 font-medium text-sm">
+                ยังไม่มีการมอบหมายชิ้นงานสำหรับห้องเรียนนี้
+              </div>`;
+          } else {
+            listContainer.innerHTML = result.data.map(item => {
+              let statusHTML = '';
+              let scoreHTML = '';
 
-            if(item.isSubmitted) {
-              statusHTML = `<p class="text-[10px] text-green-600 font-bold uppercase tracking-wide">● ส่งแล้ว (${item.submittedDate.split(' ')[0]})</p>`;
-              let scoreVal = item.score ? item.score : 'รอตรวจ';
-              scoreHTML = `
-                <div class="text-right">
-                  <span class="text-[10px] block text-gray-400 font-bold mb-1">คะแนน</span>
-                  <span class="score-badge">${scoreVal}</span>
-                </div>`;
-            } else {
-              statusHTML = `<p class="text-[10px] text-red-400 font-bold uppercase tracking-wide">○ ยังไม่ส่งงาน</p>`;
-              scoreHTML = `
-                <div class="text-right opacity-30">
-                  <span class="text-[10px] block text-gray-400 font-bold mb-1">คะแนน</span>
-                  <span class="bg-gray-200 text-gray-500 px-3 py-1 rounded-lg text-sm font-bold">-</span>
-                </div>`;
-            }
+              if(item.isSubmitted) {
+                // เซฟการตัดคำของวันที่ ป้องกันกรณีไม่มีช่องว่างในสตริง
+                let displayDate = item.submittedDate ? item.submittedDate.split(' ')[0] : '-';
+                statusHTML = `<p class="text-[10px] text-green-600 font-bold uppercase tracking-wide">● ส่งแล้ว (${displayDate})</p>`;
+                let scoreVal = item.score !== null && item.score !== undefined ? item.score : 'รอตรวจ';
+                scoreHTML = `
+                  <div class="text-right">
+                    <span class="text-[10px] block text-gray-400 font-bold mb-1">คะแนน</span>
+                    <span class="score-badge">${scoreVal}</span>
+                  </div>`;
+              } else {
+                statusHTML = `<p class="text-[10px] text-red-400 font-bold uppercase tracking-wide">○ ยังไม่ส่งงาน</p>`;
+                scoreHTML = `
+                  <div class="text-right opacity-30">
+                    <span class="text-[10px] block text-gray-400 font-bold mb-1">คะแนน</span>
+                    <span class="bg-gray-200 text-gray-500 px-3 py-1 rounded-lg text-sm font-bold">-</span>
+                  </div>`;
+              }
 
-            return `
-              <div class="hw-card p-4 flex justify-between items-center gap-4 transition hover:bg-white/80 border border-transparent hover:border-blue-100">
-                <div class="min-w-0">
-                  <h4 class="font-bold text-gray-800 text-sm sm:text-base leading-tight mb-1 truncate">${item.assignmentName}</h4>
-                  ${statusHTML}
+              return `
+                <div class="hw-card p-4 flex justify-between items-center gap-4 transition hover:bg-white/80 border border-transparent hover:border-blue-100">
+                  <div class="min-w-0 flex-1">
+                    <h4 class="font-bold text-gray-800 text-sm sm:text-base leading-tight mb-1 truncate">${item.assignmentName}</h4>
+                    ${statusHTML}
+                  </div>
+                  ${scoreHTML}
                 </div>
-                ${scoreHTML}
-              </div>
-            `;
-          }).join('');
+              `;
+            }).join('');
+          }
 
           document.getElementById('result-section').classList.remove('hidden');
           showToast('✅ ตรวจสอบข้อมูลสำเร็จ');
+        } else {
+          showToast('❌ เกิดข้อผิดพลาดจากระบบฐานข้อมูล');
         }
       } catch(err) {
-        showToast('❌ ผิดพลาด กรุณาลองใหม่');
+        showToast('❌ ผิดพลาด ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้');
       } finally {
         btn.disabled = false; btn.innerText = 'ตรวจสอบคะแนน';
       }

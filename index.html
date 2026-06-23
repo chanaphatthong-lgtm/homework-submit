@@ -56,8 +56,8 @@
 
       <div>
         <label class="block text-xs font-semibold mb-2 text-gray-600 uppercase tracking-wide">ชิ้นงานที่ต้องการส่ง</label>
-        <select id="assignment" class="hw-input" required>
-          <option value="">-- โหลดข้อมูลงาน... --</option>
+        <select id="assignment" class="hw-input" required disabled>
+          <option value="">-- เลือกห้องก่อน --</option>
         </select>
       </div>
 
@@ -97,9 +97,12 @@
   <div id="toast" class="fixed top-12 left-1/2 -translate-x-1/2 bg-gray-900/90 text-white px-5 py-3 rounded-2xl shadow-2xl hidden text-sm font-medium z-50 text-center max-w-xs w-full transition-opacity duration-300"></div>
 
   <script>
-    // 🔥 บรรทัดนี้อย่าลืมเปลี่ยนเป็น URL ของ Web App ตัวล่าสุดเสมอนะครับ
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbysycik2rVL-mmKfCAjPFXVvcaRXkNxVBUViv8g-6Zc6yMv9msXcuLGWklIg1z5_dwd/exec';
+    // 🔥 บรรทัดนี้อย่าลืมเปลี่ยนเป็น URL ของ Web App ตัวล่าสุดเสมอนะครับ (ถ้า Deploy ใหม่)
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzbMlOfoZyl0g4DkFBl1HieIVtY3hL5CPm9bs2VCvK9xlscLdUPwQJrpfsEsAfEKc2O1w/exec';
+    
+    // 💡 เพิ่มตัวแปรเก็บข้อมูลชิ้นงานทั้งหมด
     let allStudents = [];
+    let allAssignments = []; 
     let currentActiveInput = null;
 
     const fileInput = document.getElementById('file-input');
@@ -114,10 +117,12 @@
         const response = await fetch(`${SCRIPT_URL}?type=init`);
         const data = await response.json();
         
-        const assignments = data.filter(d => d.type === 'assignment');
+        // เก็บข้อมูลชิ้นงานไว้ในตัวแปรส่วนกลาง (ยังไม่แสดงผลจนกว่าจะเลือกห้อง)
+        allAssignments = data.filter(d => d.type === 'assignment');
         const asgSelect = document.getElementById('assignment');
-        asgSelect.innerHTML = '<option value="">-- เลือกชิ้นงาน --</option>' + assignments.map(a => `<option value="${a.name}">${a.name}</option>`).join('');
+        asgSelect.innerHTML = '<option value="">-- เลือกห้องก่อน --</option>';
 
+        // เก็บและแสดงข้อมูลห้องเรียน
         allStudents = data.filter(d => d.type === 'student');
         const classrooms = [...new Set(allStudents.map(s => s.classroom).filter(c => c && c.trim() !== ''))].sort();
         const classSelect = document.getElementById('classroom');
@@ -125,17 +130,35 @@
       } catch (e) { showToast('ไม่สามารถเชื่อมต่อฐานข้อมูลได้ กรุณารีเฟรชหน้าเว็บ'); }
     }
 
+    // 💡 เมื่อห้องเรียนถูกเปลี่ยน ให้กรองทั้งชื่อนักเรียน และ ชิ้นงาน
     document.getElementById('classroom').addEventListener('change', function() {
       const selectedClass = this.value;
       const stdSelect = document.getElementById('student-name');
+      const asgSelect = document.getElementById('assignment');
+      
       if(!selectedClass) {
+        // ถ้าไม่ได้เลือกห้อง ให้ล็อก Dropdown ทั้งคู่ไว้
         stdSelect.innerHTML = '<option value="">-- เลือกห้องก่อน --</option>';
         stdSelect.disabled = true;
+        asgSelect.innerHTML = '<option value="">-- เลือกห้องก่อน --</option>';
+        asgSelect.disabled = true;
         return;
       }
+      
+      // 1. กรองชื่อนักเรียนของห้องนั้น
       const roomStudents = allStudents.filter(s => s.classroom === selectedClass && s.name).sort((a, b) => parseInt(a.number) - parseInt(b.number));
       stdSelect.innerHTML = '<option value="">-- เลือกชื่อของคุณ --</option>' + roomStudents.map(s => `<option value="${s.name}" data-number="${s.number}">เลขที่ ${s.number} : ${s.name}</option>`).join('');
       stdSelect.disabled = false;
+
+      // 2. กรองชิ้นงานเฉพาะของห้องนั้น
+      const roomAssignments = allAssignments.filter(a => a.classroom === selectedClass && a.name);
+      if (roomAssignments.length > 0) {
+        asgSelect.innerHTML = '<option value="">-- เลือกชิ้นงาน --</option>' + roomAssignments.map(a => `<option value="${a.name}">${a.name}</option>`).join('');
+        asgSelect.disabled = false;
+      } else {
+        asgSelect.innerHTML = '<option value="">-- ไม่มีชิ้นงานสำหรับห้องนี้ --</option>';
+        asgSelect.disabled = true;
+      }
     });
 
     fileInput.addEventListener('change', function() {
@@ -163,7 +186,7 @@
       setTimeout(() => t.classList.add('hidden'), 4000);
     }
 
-    // 🚀 ระบบบีบอัดรูปภาพอัจฉริยะฝั่ง Client (ลดขนาดภาพก่อนส่ง ช่วยแก้ปัญหาส่งช้า/ค้าง)
+    // 🚀 ระบบบีบอัดรูปภาพอัจฉริยะฝั่ง Client
     function compressImage(file) {
       return new Promise((resolve) => {
         const reader = new FileReader();
@@ -175,7 +198,7 @@
             const canvas = document.createElement('canvas');
             let width = img.width;
             let height = img.height;
-            const MAX_WIDTH = 1000; // ย่อขนาดความกว้างสูงสุดให้เหลือ 1000px พอสำหรับตรวจงาน
+            const MAX_WIDTH = 1000;
             if (width > MAX_WIDTH) {
               height *= MAX_WIDTH / width;
               width = MAX_WIDTH;
@@ -184,7 +207,7 @@
             canvas.height = height;
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, width, height);
-            const dataUrl = canvas.toDataURL('image/jpeg', 0.7); // บีบอัดคุณภาพเหลือ 70% ไฟล์จะเล็กลงมากแต่ภาพยังชัด
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
             resolve(dataUrl);
           };
         };
@@ -213,7 +236,6 @@
       
       try {
         const file = activeFileField.files[0];
-        // เรียกใช้ระบบบีบอัดรูปภาพ
         const compressedBase64 = await compressImage(file);
         
         const now = new Date();
@@ -243,8 +265,13 @@
         if(result.isOk) {
           showToast('🎉 ส่งงานสำเร็จเรียบร้อยแล้วครับ!');
           document.getElementById('upload-form').reset();
+          
+          // รีเซ็ตค่ากลับไปปิดล็อก Dropdown
           stdSelect.innerHTML = '<option value="">-- เลือกห้องก่อน --</option>';
           stdSelect.disabled = true;
+          document.getElementById('assignment').innerHTML = '<option value="">-- เลือกห้องก่อน --</option>';
+          document.getElementById('assignment').disabled = true;
+
           fileStatus.innerText = "เลือกจากคลัง"; cameraStatus.innerText = "เปิดกล้องถ่ายรูป";
           fileLabel.className = fileLabel.className.replace('border-green-500', 'border-gray-300');
           cameraLabel.className = cameraLabel.className.replace('border-green-500', 'border-blue-200');
@@ -253,7 +280,7 @@
           showToast('❌ เกิดข้อผิดพลาด: ' + result.error); 
         }
       } catch (err) { 
-        showToast('❌ ส่งงานล้มเหลว กรุณาลองใหมี่อีกครั้ง'); 
+        showToast('❌ ส่งงานล้มเหลว กรุณาลองใหม่อีกครั้ง'); 
       } finally { 
         btn.disabled = false; btn.innerText = 'ส่งงานเข้าระบบ'; 
       }

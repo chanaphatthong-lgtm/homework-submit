@@ -98,7 +98,7 @@
   <div id="toast" class="fixed top-12 left-1/2 -translate-x-1/2 bg-gray-900/90 text-white px-5 py-3 rounded-2xl shadow-2xl hidden text-sm font-medium z-50 text-center max-w-xs w-full transition-opacity duration-300"></div>
 
   <script>
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby7ptrDDEt7vUbrh1yC11NKBN_kjx04hHzDcvZNIWCOtnL6iel3ixs6BYvnqXer0qc9sw/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyxpX2tQjf1EmILP8fFbby4ZAuP5c9K9QJOIc2OjGjwjkEboR2PjPmdJmEsbrME9ewMMQ/exec';
     let allStudents = [];
 
     async function loadInitialData() {
@@ -131,14 +131,16 @@
       if(!classroom || !numberInput) return;
       const studentNumber = parseInt(numberInput);
 
-      const roomStudents = allStudents.filter(s => s.classroom === classroom && s.name).sort((a,b) => a.name.localeCompare(b.name, 'th'));
+      const roomStudents = allStudents.filter(s => s.classroom === classroom && s.name);
+      const targetStudent = roomStudents.find(s => parseInt(s.number) === studentNumber);
 
-      if (studentNumber < 1 || studentNumber > roomStudents.length) {
+      if (!targetStudent) {
         showToast(`❌ ไม่พบเลขที่ ${studentNumber} ในห้อง ${classroom}`);
+        btn.disabled = false; btn.innerText = 'ตรวจสอบคะแนน';
         return;
       }
 
-      const targetName = roomStudents[studentNumber - 1].name;
+      const targetName = targetStudent.name;
 
       btn.disabled = true; btn.innerText = 'กำลังตรวจชีท...';
       showToast('กำลังดึงข้อมูลคะแนนล่าสุด...');

@@ -181,7 +181,7 @@
   <div id="toast" class="fixed top-12 left-1/2 -translate-x-1/2 bg-gray-900/95 backdrop-blur-sm text-white px-6 py-3.5 rounded-2xl shadow-2xl hidden text-sm font-medium z-50 text-center max-w-[90%] w-max transition-all duration-300 border border-gray-800" style="will-change: transform, opacity; transform: translate(-50%, 0) translateZ(0);"></div>
 
   <script>
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby-8SENFgYTb1XeOTG1CAp3dK0zBnmcrMwOP6P5jPcV68erex_W3oj-R6w7rgdSztGrwg/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxMdNGENaDqTkRYk79NxJZjwllTqK0KfO4JNuEAAj4TD0_OHsx6TEoIBXrWtqJ5-QodjA/exec';
     
     let allStudents = [];
     let allAssignments = []; 
@@ -234,11 +234,19 @@
         return;
       }
       
+      // ดึงรายชื่อนักเรียน
       const roomStudents = allStudents.filter(s => s.classroom === selectedClass && s.name).sort((a, b) => parseInt(a.number) - parseInt(b.number));
       stdSelect.innerHTML = '<option value="">-- เลือกชื่อของคุณ --</option>' + roomStudents.map(s => `<option value="${s.name}" data-number="${s.number}">เลขที่ ${s.number} : ${s.name}</option>`).join('');
       stdSelect.disabled = false;
 
-      const roomAssignments = allAssignments.filter(a => a.classroom === selectedClass && a.name);
+      // ดึงชิ้นงาน + กรองชิ้นงานที่มีเครื่องหมาย "-" ออก
+      const roomAssignments = allAssignments.filter(a => {
+        // เช็คว่าใน Object (ทุกคอลัมน์ของแถวนี้) มีการพิมพ์เครื่องหมาย "-" ไว้หรือไม่
+        const isHidden = Object.values(a).some(val => String(val).trim() === '-');
+        // ต้องตรงกับห้องที่เลือก, มีชื่อชิ้นงาน, และไม่ได้ถูกซ่อนไว้
+        return a.classroom === selectedClass && a.name && !isHidden;
+      });
+
       if (roomAssignments.length > 0) {
         asgSelect.innerHTML = '<option value="">-- เลือกชิ้นงาน --</option>' + roomAssignments.map(a => `<option value="${a.name}">${a.name}</option>`).join('');
         asgSelect.disabled = false;

@@ -188,14 +188,15 @@
   <div id="toast" class="fixed top-12 left-1/2 -translate-x-1/2 bg-gray-900/95 backdrop-blur-sm text-white px-6 py-3.5 rounded-2xl shadow-2xl hidden text-sm font-medium z-50 text-center max-w-[90%] w-max transition-all duration-300 border border-gray-800" style="will-change: transform, opacity; transform: translate(-50%, 0) translateZ(0);"></div>
 
   <script>
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxMdNGENaDqTkRYk79NxJZjwllTqK0KfO4JNuEAAj4TD0_OHsx6TEoIBXrWtqJ5-QodjA/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwqBiqE_-L-IhwZPiZj4Gzqr7JLGncbwKU9JfkCFKI2FaFXnq6HtTuuUxrmqoIlAGwtQw/exec';
     let allStudents = [];
+    let allAssignments = [];
 
     function showToast(msg) {
       const t = document.getElementById('toast');
       t.textContent = msg; 
       t.classList.remove('hidden');
-      void t.offsetWidth; // Force Reflow เพื่อให้แอนิเมชันลื่นไหลไหล่ทางเรียบเนียน
+      void t.offsetWidth; // Force Reflow
       t.style.opacity = '1';
       setTimeout(() => {
         t.style.opacity = '0';
@@ -207,7 +208,10 @@
       try {
         const res = await fetch(`${SCRIPT_URL}?type=init`);
         const data = await res.json();
+        
         allStudents = data.filter(d => d.type === 'student');
+        allAssignments = data.filter(d => d.type === 'assignment');
+        
         const classrooms = [...new Set(allStudents.map(s => s.classroom))].sort();
         const classSelect = document.getElementById('select-classroom');
         
@@ -276,7 +280,6 @@
       `;
 
       try {
-        // กั้นสิทธิ์เบราว์เซอร์ 1 เฟรม เพื่อเคลียร์แอนิเมชันปุ่มกดให้ลื่น
         await new Promise(r => requestAnimationFrame(r));
         
         const url = `${SCRIPT_URL}?action=checkStatus&classroom=${encodeURIComponent(student.classroom)}&name=${encodeURIComponent(student.name)}&number=${encodeURIComponent(student.number)}`;
@@ -286,8 +289,19 @@
         if(result.isOk) {
           document.getElementById('res-name').innerText = student.name;
           document.getElementById('res-class').innerText = `เลขที่ ${student.number} | ${student.classroom}`;
-          document.getElementById('res-hw-score').innerText = result.totalScore;
 
+          // ⚡ คำนวณคะแนนรวมฝั่ง Client ด้านล่างให้ชัวร์และแม่นยำขึ้นจากประวัติ
+          let computedTotalScore = 0;
+          if(result.data && Array.isArray(result.data)) {
+            result.data.forEach(h => {
+              if (h.score && !isNaN(parseFloat(h.score))) {
+                computedTotalScore += parseFloat(h.score);
+              }
+            });
+          }
+          document.getElementById('res-hw-score').innerText = computedTotalScore;
+
+          // ⚡ จัดการการ์ดคะแนนสอบล่าสุด
           const examContainer = document.getElementById('exam-container');
           let examScoreRaw = result.examScore;
           let parsedExamScore = parseFloat(examScoreRaw);
@@ -300,7 +314,7 @@
                   <div class="absolute top-0 left-0 w-1.5 h-full bg-red-500"></div>
                   <div class="pr-3 z-10 max-w-[70%]">
                     <span class="text-red-600 text-[10px] font-bold uppercase tracking-wide bg-white px-2.5 py-1 rounded shadow-sm border border-red-100">🚨 สอบไม่ผ่าน</span>
-                    <h3 class="font-bold text-gray-900 text-[15px] mt-2.5 leading-tight">${result.examTitle}</h3>
+                    <h3 class="font-bold text-gray-900 text-[15px] mt-2.5 leading-tight">${result.examTitle || 'การทดสอบวัดผล'}</h3>
                     <p class="text-[11px] text-red-600 font-medium mt-1.5 leading-relaxed">โปรดดำเนินการส่งงานแก้ให้เรียบร้อย</p>
                   </div>
                   <div class="flex flex-col items-center shrink-0 z-10">
@@ -315,7 +329,7 @@
                   <div class="absolute -right-6 -top-6 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
                   <div class="pr-3 z-10 max-w-[70%]">
                     <span class="text-[#293B86] text-[10px] font-bold uppercase tracking-wide bg-white/95 px-2.5 py-1 rounded shadow-sm backdrop-blur-sm">🏆 คะแนนสอบล่าสุด</span>
-                    <h3 class="font-bold text-white text-[15px] mt-2.5 leading-tight drop-shadow-sm">${result.examTitle}</h3>
+                    <h3 class="font-bold text-white text-[15px] mt-2.5 leading-tight drop-shadow-sm">${result.examTitle || 'การทดสอบวัดผล'}</h3>
                     <p class="text-[11px] text-blue-200 font-medium mt-1.5">✅ ผ่านเกณฑ์เรียบร้อย</p>
                   </div>
                   <div class="flex flex-col items-center shrink-0 z-10">
@@ -330,7 +344,7 @@
                 <div class="bg-white border border-gray-100 p-5 rounded-[1.5rem] shadow-sm flex justify-between items-center fade-in-up" style="animation-delay: 50ms;">
                   <div class="pr-3 z-10 max-w-[70%]">
                     <span class="bg-gray-50 text-gray-500 border border-gray-100 text-[10px] px-2.5 py-1 rounded font-bold uppercase tracking-wide shadow-sm">📌 คะแนนสอบล่าสุด</span>
-                    <h3 class="font-bold text-gray-900 text-[15px] mt-2.5 leading-tight">${result.examTitle}</h3>
+                    <h3 class="font-bold text-gray-900 text-[15px] mt-2.5 leading-tight">${result.examTitle || 'การทดสอบ'}</h3>
                   </div>
                   <div class="flex flex-col items-center shrink-0">
                     <span class="text-[10px] text-gray-400 font-medium mb-1">สถานะ</span>
@@ -340,22 +354,47 @@
             `;
           }
 
+          // ⚡ ดึงข้อมูลชิ้นงานทั้งหมดของห้องเรียนนี้มา Cross-Check เพื่อแสดงผลช่อง "ไม่ได้ส่ง" ด้วย
           const hwContainer = document.getElementById('homework-list');
-          if(!result.data || result.data.length === 0) {
+          const classAssignments = allAssignments.filter(a => a.classroom === student.classroom);
+
+          if(classAssignments.length === 0) {
             hwContainer.className = "block mt-2 fade-in-up"; 
             hwContainer.style.animationDelay = "100ms";
             hwContainer.innerHTML = `<div class="bg-white p-6 rounded-[1.5rem] shadow-sm border border-gray-50 text-center text-[13px] text-gray-400">ยังไม่มีการมอบหมายชิ้นงานในระบบ</div>`;
           } else {
             hwContainer.className = "grid grid-cols-2 gap-3 mt-2"; 
-            hwContainer.innerHTML = result.data.map((h, index) => {
-              let statusText, statusColor, scoreBox;
+            
+            // แมตช์งานที่มีทั้งหมดเข้ากับข้อมูลส่งงานที่ได้มาจากหลังบ้าน
+            const fullReportData = classAssignments.map(asg => {
+              const matchSub = result.data ? result.data.find(sub => (sub.assignment || '').toString().trim() === asg.name.toString().trim()) : null;
+              return {
+                assignmentName: asg.name,
+                isSubmitted: !!matchSub,
+                submittedDate: matchSub ? matchSub.date : "-",
+                score: matchSub ? matchSub.score : "",
+                isLate: matchSub ? matchSub.isLate : false
+              };
+            });
+
+            hwContainer.innerHTML = fullReportData.map((h, index) => {
+              let statusText, statusColor, scoreBox, dotColor;
               
               if (h.isSubmitted) {
-                let displayDate = h.submittedDate ? h.submittedDate.split(' ')[0] : '';
-                statusText = displayDate ? `ส่งแล้ว (${displayDate})` : 'ส่งแล้ว';
-                statusColor = "text-emerald-600";
+                let displayDate = (h.submittedDate && h.submittedDate !== '-') ? h.submittedDate.split(' ')[0] : '';
                 
-                if (h.score !== null && h.score !== '') {
+                // 🎯 ตรวจสอบเงื่อนไขดอกจัน (*) และเปลี่ยนเป็นสีส้ม Amber เด้งขึ้นมา
+                if (h.isLate) {
+                  statusText = displayDate ? `ส่งช้า (${displayDate})` : 'ส่งช้า';
+                  statusColor = "text-amber-500 font-semibold";
+                  dotColor = "bg-amber-500 shadow-amber-500/30";
+                } else {
+                  statusText = displayDate ? `ส่งแล้ว (${displayDate})` : 'ส่งแล้ว';
+                  statusColor = "text-emerald-600";
+                  dotColor = "bg-emerald-500 shadow-emerald-500/30";
+                }
+                
+                if (h.score !== null && h.score !== '' && h.score !== '-') {
                   let cleanScore = !isNaN(parseFloat(h.score)) ? parseFloat(h.score).toFixed(1).replace('.0', '') : h.score;
                   scoreBox = `<div class="bg-gradient-to-tr from-[#293B86] to-[#3a4ea8] text-white min-w-[3.5rem] h-10 px-3 flex items-center justify-center rounded-xl font-bold text-[20px] shadow-sm border border-[#293B86]/20">${cleanScore}</div>`;
                 } else {
@@ -364,16 +403,16 @@
               } else {
                 statusText = `ไม่ได้ส่ง`;
                 statusColor = "text-rose-500";
+                dotColor = "bg-rose-500 shadow-rose-500/30";
                 scoreBox = `<div class="bg-gray-50 border border-gray-100 text-gray-400 min-w-[3.5rem] h-10 px-3 flex items-center justify-center rounded-xl font-bold text-[20px] shadow-inner">-</div>`;
               }
               
-              // เพิ่มเอฟเฟกต์ทยอยเด้งขึ้นมาทีละชิ้น (Staggered Animation Delay) เพื่อความ Smooth ระดับ 60FPS
               return `
                 <div class="card-hover bg-white p-4 rounded-[1.25rem] shadow-sm border border-gray-50 flex flex-col relative h-full fade-in-up" style="animation-delay: ${100 + (index * 40)}ms;">
                   <div class="mb-3">
                     <h4 class="font-semibold text-gray-800 text-[13px] leading-relaxed mb-2 line-clamp-2">${h.assignmentName}</h4>
                     <div class="flex items-center gap-1.5 text-[11px] font-medium ${statusColor}">
-                      <span class="w-2 h-2 rounded-full shrink-0 shadow-sm ${h.isSubmitted ? 'bg-emerald-500 shadow-emerald-500/30' : 'bg-rose-500 shadow-rose-500/30'}"></span>
+                      <span class="w-2 h-2 rounded-full shrink-0 shadow-sm ${dotColor}"></span>
                       <span class="truncate">${statusText}</span>
                     </div>
                   </div>

@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
   <title>ระบบตรวจสอบคะแนน - ครูเกมส์</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -11,6 +11,7 @@
     * {
       -webkit-tap-highlight-color: transparent;
       font-family: 'DM Sans', sans-serif;
+      box-sizing: border-box;
     }
     html, body {
       max-width: 100vw;
@@ -19,16 +20,23 @@
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
       scroll-behavior: smooth;
+      /* ⚡ ป้องกัน Android ขยายฟอนต์และ UI ผิดปกติ */
+      -webkit-text-size-adjust: 100% !important;
+      -moz-text-size-adjust: 100% !important;
+      -ms-text-size-adjust: 100% !important;
+      text-size-adjust: 100% !important;
     }
     
-    /* ⚡ ช่อง Input เด้งสปริงแบบ 60FPS */
+    /* ⚡ ช่อง Input เด้งสปริงแบบ 60FPS และล็อกขนาดสำหรับ Android */
     .hw-input {
       background: rgba(118,118,128,0.06);
       border: 2px solid transparent;
       border-radius: 12px;
       padding: 12px 16px;
-      font-size: 15px;
+      font-size: 15px !important; /* ล็อกขนาดฟอนต์ */
+      line-height: 1.2;
       width: 100%;
+      height: 48px; /* ล็อกความสูงป้องกันการถูกบีบขยาย */
       transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       will-change: transform, box-shadow, border-color;
       transform: translateZ(0);
@@ -64,12 +72,16 @@
       opacity: 0.6;
     }
     
+    /* ⚡ ล้างสไตล์ Select บนเบราว์เซอร์มือถือทั้งหมด */
     select.hw-input {
-      appearance: none;
-      -webkit-appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 16px center;
+      appearance: none !important;
+      -webkit-appearance: none !important;
+      -moz-appearance: none !important;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+      background-repeat: no-repeat !important;
+      background-position: right 16px center !important;
+      background-size: 14px !important;
+      padding-right: 40px !important;
     }
 
     .line-clamp-2 {
@@ -192,6 +204,25 @@
     let allStudents = [];
     let allAssignments = [];
 
+    // ⚡ เพิ่ม SafeStorage เพื่อป้องกันแอปพลิเคชันอย่าง LINE/Facebook บน Android บล็อก LocalStorage จนหน้าเว็บขาว
+    const SafeStorage = {
+      get: function(key) {
+        try { return localStorage.getItem(key); } catch (e) { return null; }
+      },
+      set: function(key, value) {
+        try { localStorage.setItem(key, value); } catch (e) { console.warn("Storage blocked"); }
+      }
+    };
+    
+    const SafeSessionStorage = {
+      get: function(key) {
+        try { return sessionStorage.getItem(key); } catch (e) { return null; }
+      },
+      set: function(key, value) {
+        try { sessionStorage.setItem(key, value); } catch (e) { console.warn("Session Storage blocked"); }
+      }
+    };
+
     function renderInitialDropdowns(data) {
       allStudents = data.filter(d => d.type === 'student');
       allAssignments = data.filter(d => d.type === 'assignment');
@@ -234,7 +265,7 @@
     }
 
     window.onload = async function() {
-      const cachedData = localStorage.getItem('krugames_app_data');
+      const cachedData = SafeStorage.get('krugames_app_data');
       let hasCache = false;
 
       if (cachedData) {
@@ -252,7 +283,7 @@
         const res = await fetch(`${SCRIPT_URL}?type=init`);
         const data = await res.json();
         
-        localStorage.setItem('krugames_app_data', JSON.stringify(data));
+        SafeStorage.set('krugames_app_data', JSON.stringify(data));
         
         if (!hasCache) {
           renderInitialDropdowns(data);
@@ -321,14 +352,12 @@
       await new Promise(resolve => setTimeout(resolve, 30));
 
       try {
-        // ⚡ ระบบ Cache ความจำระยะสั้น (เปลี่ยนเป็น 10 นาที = 600,000 ms)
         const cacheKey = `score_${student.classroom}_${student.number}`;
-        const cachedSession = sessionStorage.getItem(cacheKey);
+        const cachedSession = SafeSessionStorage.get(cacheKey);
         let result = null;
         
         if(cachedSession) {
           const parsedCache = JSON.parse(cachedSession);
-          // 10 นาที = 600,000 มิลลิวินาที
           if(Date.now() - parsedCache.time < 600000) {
             result = parsedCache.data;
           }
@@ -339,7 +368,7 @@
           const res = await fetch(url);
           result = await res.json();
           if(result.isOk) {
-            sessionStorage.setItem(cacheKey, JSON.stringify({ time: Date.now(), data: result }));
+            SafeSessionStorage.set(cacheKey, JSON.stringify({ time: Date.now(), data: result }));
           }
         }
 

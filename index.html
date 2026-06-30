@@ -194,30 +194,80 @@
     const fileStatus = document.getElementById('file-status');
     const cameraStatus = document.getElementById('camera-status');
 
+    // 🚀 ฟังก์ชันหลักสำหรับแมปข้อมูลลง Dropdown ของห้องเรียน
+    function renderInitialDropdowns(data) {
+      allAssignments = data.filter(d => d.type === 'assignment');
+      allStudents = data.filter(d => d.type === 'student');
+
+      const classrooms = [...new Set(allStudents.map(s => s.classroom).filter(c => c && c.trim() !== ''))].sort();
+      const classSelect = document.getElementById('classroom');
+      
+      // บันทึกห้องที่เด็กอาจจะเลือกค้างไว้ก่อนอัปเดตแคช
+      const currentSelection = classSelect.value;
+      
+      classSelect.innerHTML = '<option value="">-- เลือกห้อง --</option>' + classrooms.map(c => `<option value="${c}">${c}</option>`).join('');
+      
+      // ถ้าเด็กเลือกห้องไปแล้ว ให้ดึงค่าเดิมกลับมา ไม่ให้หน้าจอเด้งรีเซ็ต
+      if (currentSelection && classrooms.includes(currentSelection)) {
+        classSelect.value = currentSelection;
+      }
+    }
+
+    // 🚀 ฟังก์ชันซ่อน Skeleton แบบสมูทนุ่มนวล
+    function hideSkeletonLoader() {
+      const loader = document.getElementById('loading-skeleton');
+      if (loader && !loader.classList.contains('hidden')) {
+        loader.style.opacity = '0';
+        setTimeout(() => loader.classList.add('hidden'), 500);
+      }
+    }
+
+    // 🚀 ฟังก์ชันเริ่มต้นโหลดข้อมูลแบบผสมผสานความเร็วสูง (Cache + Background Fetch)
     async function loadInitData() {
+      // Step 1: ดึงข้อมูลแคชเก่าในเบราว์เซอร์ของนักเรียนมาแสดงผลทันทีภายใน 0.1 วิ!
+      const cachedData = localStorage.getItem('krugames_app_data');
+      let hasCache = false;
+
+      if (cachedData) {
+        try {
+          const data = JSON.parse(cachedData);
+          renderInitialDropdowns(data);
+          hideSkeletonLoader();
+          hasCache = true;
+        } catch (e) {
+          console.error("การถอดรหัสแคชผิดพลาด:", e);
+        }
+      }
+
+      // Step 2: แอบรันดึงข้อมูลล่าสุดจากชีทในพื้นหลังแบบเงียบ ๆ เผื่อคุณครูสั่งงานเพิ่ม
       try {
         const response = await fetch(`${SCRIPT_URL}?type=init`);
         const data = await response.json();
         
-        allAssignments = data.filter(d => d.type === 'assignment');
-        const asgSelect = document.getElementById('assignment');
-        asgSelect.innerHTML = '<option value="">-- เลือกห้องก่อน --</option>';
-
-        allStudents = data.filter(d => d.type === 'student');
-        const classrooms = [...new Set(allStudents.map(s => s.classroom).filter(c => c && c.trim() !== ''))].sort();
-        const classSelect = document.getElementById('classroom');
-        classSelect.innerHTML = '<option value="">-- เลือกห้อง --</option>' + classrooms.map(c => `<option value="${c}">${c}</option>`).join('');
+        // บันทึกข้อมูลล่าสุดทับลงในแคชของเครื่องนักเรียน
+        localStorage.setItem('krugames_app_data', JSON.stringify(data));
         
-        setTimeout(() => {
-          const loader = document.getElementById('loading-skeleton');
-          if (loader) {
-            loader.style.opacity = '0';
-            setTimeout(() => loader.classList.add('hidden'), 500);
+        // ถ้าเป็นเด็กใหม่ที่เพิ่งเข้าเว็บครั้งแรก (ไม่มีแคช) ให้เรนเดอร์และซ่อนโครงกระดูกตอนนี้
+        if (!hasCache) {
+          renderInitialDropdowns(data);
+          hideSkeletonLoader();
+        } else {
+          // ถ้ามีแคชและแสดงผลไปแล้ว ให้ปรับข้อมูลในหน่วยความจำเผื่อเด็กเปลี่ยนคลาสใช้งาน
+          allAssignments = data.filter(d => d.type === 'assignment');
+          allStudents = data.filter(d => d.type === 'student');
+          
+          // หากนักเรียนยังไม่ได้เลือกห้อง ให้แอบเปลี่ยนตัวเลือกห้องให้ทันสมัยล่าสุด
+          const classSelect = document.getElementById('classroom');
+          if (!classSelect.value) {
+            const classrooms = [...new Set(allStudents.map(s => s.classroom).filter(c => c && c.trim() !== ''))].sort();
+            classSelect.innerHTML = '<option value="">-- เลือกห้อง --</option>' + classrooms.map(c => `<option value="${c}">${c}</option>`).join('');
           }
-        }, 300);
-
+        }
       } catch (e) { 
-        showToast('ไม่สามารถเชื่อมต่อฐานข้อมูลได้ กรุณารีเฟรชหน้าเว็บ'); 
+        console.error("ดึงข้อมูลพื้นหลังไม่สำเร็จ:", e);
+        if (!hasCache) {
+          showToast('ไม่สามารถเชื่อมต่อฐานข้อมูลได้ กรุณารีเฟรชหน้าเว็บ'); 
+        }
       }
     }
 
@@ -241,9 +291,7 @@
 
       // ดึงชิ้นงาน + กรองชิ้นงานที่มีเครื่องหมาย "-" ออก
       const roomAssignments = allAssignments.filter(a => {
-        // เช็คว่าใน Object (ทุกคอลัมน์ของแถวนี้) มีการพิมพ์เครื่องหมาย "-" ไว้หรือไม่
         const isHidden = Object.values(a).some(val => String(val).trim() === '-');
-        // ต้องตรงกับห้องที่เลือก, มีชื่อชิ้นงาน, และไม่ได้ถูกซ่อนไว้
         return a.classroom === selectedClass && a.name && !isHidden;
       });
 
@@ -279,8 +327,7 @@
       const t = document.getElementById('toast');
       t.textContent = msg; 
       t.classList.remove('hidden');
-      // Force reflow
-      void t.offsetWidth;
+      void t.offsetWidth; // Force reflow
       t.style.opacity = '1';
       setTimeout(() => {
         t.style.opacity = '0';
@@ -337,8 +384,6 @@
       
       try {
         const file = activeFileField.files[0];
-        
-        // ให้ UI อัปเดตข้อความปุ่มให้เสร็จก่อน แล้วค่อยบีบอัดรูป
         await new Promise(r => requestAnimationFrame(r));
         const compressedBase64 = await compressImage(file);
         

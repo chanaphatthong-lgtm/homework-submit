@@ -192,6 +192,37 @@
     let allStudents = [];
     let allAssignments = [];
 
+    // 🚀 ฟังก์ชันหลักสำหรับแมปข้อมูลลง Dropdown ของห้องเรียน
+    function renderInitialDropdowns(data) {
+      allStudents = data.filter(d => d.type === 'student');
+      allAssignments = data.filter(d => d.type === 'assignment');
+      
+      const classrooms = [...new Set(allStudents.map(s => s.classroom))].sort();
+      const classSelect = document.getElementById('select-classroom');
+      
+      const currentSelection = classSelect.value;
+      
+      classSelect.innerHTML = '<option value="">-- เลือกห้องเรียน --</option>';
+      classrooms.forEach(c => {
+        let opt = document.createElement('option');
+        opt.value = c; opt.textContent = c;
+        classSelect.appendChild(opt);
+      });
+
+      if (currentSelection && classrooms.includes(currentSelection)) {
+        classSelect.value = currentSelection;
+      }
+    }
+
+    // 🚀 ฟังก์ชันซ่อน Skeleton แบบสมูท
+    function hideSkeletonLoader() {
+      const loader = document.getElementById('loading-skeleton');
+      if(loader && !loader.classList.contains('hidden')) {
+        loader.style.opacity = '0';
+        setTimeout(() => loader.classList.add('hidden'), 500);
+      }
+    }
+
     function showToast(msg) {
       const t = document.getElementById('toast');
       t.textContent = msg; 
@@ -204,34 +235,50 @@
       }, 4000);
     }
 
+    // 🚀 โหลดข้อมูลแบบผสมผสานความเร็วสูง (Cache + Background Fetch)
     window.onload = async function() {
+      const cachedData = localStorage.getItem('krugames_app_data');
+      let hasCache = false;
+
+      // Step 1: ดึงแคชมาแสดงผลก่อนทันที 0.1 วิ
+      if (cachedData) {
+        try {
+          const data = JSON.parse(cachedData);
+          renderInitialDropdowns(data);
+          hideSkeletonLoader();
+          hasCache = true;
+        } catch (e) {
+          console.error("การถอดรหัสแคชผิดพลาด:", e);
+        }
+      }
+
+      // Step 2: แอบรันดึงข้อมูลล่าสุดจากชีทในพื้นหลัง
       try {
         const res = await fetch(`${SCRIPT_URL}?type=init`);
         const data = await res.json();
         
-        allStudents = data.filter(d => d.type === 'student');
-        allAssignments = data.filter(d => d.type === 'assignment');
+        // บันทึกแคชใหม่
+        localStorage.setItem('krugames_app_data', JSON.stringify(data));
         
-        const classrooms = [...new Set(allStudents.map(s => s.classroom))].sort();
-        const classSelect = document.getElementById('select-classroom');
-        
-        classrooms.forEach(c => {
-          let opt = document.createElement('option');
-          opt.value = c; opt.textContent = c;
-          classSelect.appendChild(opt);
-        });
-
-        setTimeout(() => {
-          const loader = document.getElementById('loading-skeleton');
-          if(loader) {
-            loader.style.opacity = '0';
-            setTimeout(() => loader.classList.add('hidden'), 500);
+        if (!hasCache) {
+          renderInitialDropdowns(data);
+          hideSkeletonLoader();
+        } else {
+          // อัปเดตข้อมูลตัวแปรหลักเผื่อมีการเปลี่ยนแปลงรายชื่อหรือห้องเรียน
+          allStudents = data.filter(d => d.type === 'student');
+          allAssignments = data.filter(d => d.type === 'assignment');
+          
+          const classSelect = document.getElementById('select-classroom');
+          if (!classSelect.value) {
+            renderInitialDropdowns(data);
           }
-        }, 300);
-
+        }
       } catch (e) { 
-        showToast('❌ เกิดข้อผิดพลาดในการเตรียมข้อมูล'); 
-        document.getElementById('loading-skeleton').innerHTML = '<div class="h-full flex items-center justify-center"><p class="text-xs text-red-500 font-medium">โหลดข้อมูลไม่สำเร็จ กรุณารีเฟรชหน้าเว็บ</p></div>';
+        console.error("ดึงข้อมูลพื้นหลังไม่สำเร็จ:", e);
+        if (!hasCache) {
+          showToast('❌ เกิดข้อผิดพลาดในการเตรียมข้อมูล'); 
+          document.getElementById('loading-skeleton').innerHTML = '<div class="h-full flex items-center justify-center"><p class="text-xs text-red-500 font-medium">โหลดข้อมูลไม่สำเร็จ กรุณารีเฟรชหน้าเว็บ</p></div>';
+        }
       }
     };
 

@@ -3,180 +3,289 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบหลังบ้าน - ส่งงานครูเกมส์</title>
+  <title>ระบบตรวจงานแอดมิน - ครูเกมส์</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
   <style>
-    body { font-family: 'DM Sans', sans-serif; -webkit-font-smoothing: antialiased; }
-    .hw-card { background: rgba(255,255,255,0.95); border: 1px solid rgba(0,0,0,0.04); border-radius: 20px; box-shadow: 0 4px 20px rgba(30,64,175,0.05); }
-    .hw-input { background: rgba(118,118,128,0.06); border: none; border-radius: 12px; padding: 10px 14px; font-size: 14px; width: 100%; transition: all 0.2s; }
-    .hw-input:focus { background: rgba(118,118,128,0.12); box-shadow: 0 0 0 2px rgba(30, 64, 175, 0.2); outline: none; }
-    .hw-list-item { background: #fff; padding: 12px 16px; border-bottom: 0.5px solid rgba(0,0,0,0.04); }
-    .hw-list-item:first-child { border-radius: 16px 16px 0 0; }
-    .hw-list-item:last-child { border-radius: 0 0 16px 16px; border-bottom: none; }
-    .hw-segment { background: rgba(255,255,255,0.6); border-radius: 12px; padding: 4px; display: flex; }
-    .hw-tab-btn { flex: 1; border-radius: 9px; padding: 10px 12px; font-size: 13px; font-weight: 500; color: #666; border: none; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; transition: 0.2s;}
-    .hw-tab-btn.active { background: #fff; box-shadow: 0 2px 8px rgba(30,64,175,0.08); color: #1E40AF; font-weight: 600; }
+    * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+    html, body { 
+      overflow-x: hidden; 
+      font-family: 'DM Sans', sans-serif; 
+      -webkit-font-smoothing: antialiased; 
+      scroll-behavior: smooth; 
+    }
+    .hw-card { 
+      background: rgba(255,255,255,0.95); 
+      border: 1px solid rgba(0,0,0,0.04); 
+      border-radius: 20px; 
+      box-shadow: 0 4px 20px rgba(30,64,175,0.05); 
+    }
+    .hw-input { 
+      background: rgba(118,118,128,0.06); 
+      border: 2px solid transparent; 
+      border-radius: 12px; 
+      padding: 12px 16px; 
+      font-size: 15px; 
+      width: 100%; 
+      transition: all 0.3s; 
+    }
+    .hw-input:focus { 
+      background: #ffffff; 
+      border-color: #3b82f6; 
+      box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15); 
+      outline: none; 
+    }
+    .btn-tactile { transition: all 0.2s; }
+    .btn-tactile:active { transform: scale(0.96) translateY(2px); }
+    .btn-tactile:hover { filter: brightness(1.05); }
+    
+    /* 🎯 ตกแต่งช่องรูปภาพแสดงผล และทำเอฟเฟกต์ขยายเมื่อเอาเมาส์ชี้ */
+    .img-preview {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 12px;
+        transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease;
+        cursor: pointer;
+        border: 2px solid #e5e7eb;
+    }
+    .img-preview:hover {
+        transform: scale(3.5);
+        z-index: 50;
+        position: relative;
+        box-shadow: 0 12px 20px -3px rgba(0, 0, 0, 0.3);
+        border-color: #3b82f6;
+    }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 10px; }
   </style>
 </head>
-<body class="min-h-screen bg-[#E6F2FB] text-gray-800">
+<body class="min-h-screen bg-[#E6F2FB] text-gray-800 pb-10">
   
-  <header class="pt-8 pb-6 px-5 max-w-lg mx-auto flex flex-col items-center text-center gap-0">
-    <img src="เกมส์_01.png" alt="โลโก้ครูเกมส์" class="w-40 h-40 object-cover drop-shadow-md z-0" onerror="this.style.display='none'">
-    <div class="flex flex-col items-center -mt-10 z-10">
-      <img src="ส่งงานครูเกมส์.png" alt="ส่งงานครูเกมส์" class="max-w-[260px] h-auto object-contain drop-shadow-sm" onerror="this.onerror=null; this.outerHTML='<h1 class=\'font-bold text-2xl leading-tight text-gray-900\'>ระบบจัดการหลังบ้าน</h1>';">
-      <p class="text-xs mt-2 text-blue-700 bg-white px-4 py-1.5 rounded-full inline-block font-medium shadow-sm">แผงควบคุมสำหรับครูเกมส์</p>
-    </div>
+  <header class="pt-8 pb-6 px-5 max-w-7xl mx-auto flex flex-col items-center text-center gap-0 relative z-10">
+    <img src="เกมส์_01.png" alt="โลโก้ครูเกมส์" class="w-32 h-32 object-cover drop-shadow-md mb-2" onerror="this.style.display='none'">
+    <h1 class="font-bold text-3xl leading-tight text-gray-900 drop-shadow-sm mb-1">ตรวจงานครูเกมส์</h1>
+    <p class="text-sm mt-1 text-white bg-blue-800 px-5 py-1.5 rounded-full inline-block font-semibold shadow-md">แผงควบคุมแอดมิน (Admin Panel)</p>
   </header>
 
-  <nav class="max-w-lg mx-auto px-5 mb-5">
-    <div class="hw-segment flex">
-      <button class="hw-tab-btn active" data-tab="report"><i data-lucide="bar-chart-3" style="width:16px;height:16px;"></i> การส่งงาน</button> 
-      <button class="hw-tab-btn" data-tab="manage-assignments"><i data-lucide="clipboard-list" style="width:16px;height:16px;"></i> ชิ้นงาน</button> 
-      <button class="hw-tab-btn" data-tab="manage-students"><i data-lucide="users" style="width:16px;height:16px;"></i> นักเรียน</button>
+  <main class="max-w-7xl mx-auto px-5 space-y-6">
+    
+    <div class="hw-card p-6 relative z-20">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+        <div>
+          <label class="block text-sm font-bold mb-2 text-gray-600 uppercase">เลือกระดับชั้น / ห้อง</label>
+          <select id="selectClass" class="hw-input" onchange="updateAssignmentDropdown()">
+            <option value="">-- กำลังโหลดข้อมูล... --</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-bold mb-2 text-gray-600 uppercase">เลือกชิ้นงาน</label>
+          <select id="selectAssignment" class="hw-input" disabled>
+            <option value="">-- เลือกห้องก่อน --</option>
+          </select>
+        </div>
+        <div>
+          <button id="fetchBtn" onclick="loadAdminTable()" class="btn-tactile w-full bg-blue-700 text-white font-bold text-lg p-3 rounded-xl shadow-md disabled:bg-gray-400">
+            🔍 ดึงตารางตรวจงาน
+          </button>
+        </div>
+      </div>
     </div>
-  </nav>
 
-  <main class="max-w-lg mx-auto px-5 pb-10">
-    <section id="tab-report">
-      <div class="flex gap-2 mb-4">
-        <select id="filter-classroom" class="hw-input flex-1 bg-white shadow-sm"><option value="">ทุกห้อง</option></select> 
-        <select id="filter-assignment" class="hw-input flex-1 bg-white shadow-sm"><option value="">ทุกงาน</option></select>
+    <div id="tableContainer" class="hw-card overflow-hidden hidden transition-all duration-500">
+      <div class="overflow-x-auto w-full p-2">
+        <table class="w-full text-left border-collapse min-w-[800px]">
+          <thead>
+            <tr class="bg-gray-100 text-gray-700 text-sm uppercase tracking-wide border-b-2 border-gray-200">
+              <th class="py-4 px-4 font-bold w-[10%] text-center">เลขที่</th>
+              <th class="py-4 px-4 font-bold w-[30%]">ชื่อ - นามสกุล</th>
+              <th class="py-4 px-4 font-bold w-[15%] text-center">สถานะ</th>
+              <th class="py-4 px-4 font-bold w-[20%] text-center">รูปผลงาน</th>
+              <th class="py-4 px-4 font-bold w-[25%]">บันทึกคะแนน</th>
+            </tr>
+          </thead>
+          <tbody id="studentTableBody" class="divide-y divide-gray-100 text-base">
+            </tbody>
+        </table>
       </div>
-      <div id="report-content" class="space-y-4">กำลังโหลดข้อมูล...</div>
-    </section>
-
-    <section id="tab-manage-assignments" class="hidden">
-      <div class="hw-card p-5 space-y-4 bg-white mb-4">
-        <h3 class="font-bold text-gray-800 flex items-center gap-2"><i data-lucide="plus-circle" class="text-blue-500"></i> เพิ่มงานใหม่</h3>
-        <div class="flex gap-2">
-          <input id="new-assignment" type="text" class="hw-input flex-1" placeholder="พิมพ์ชื่องาน..."> 
-          <button id="add-assignment-btn" class="bg-blue-500 text-white px-5 rounded-xl text-xs font-semibold hover:bg-blue-600 transition">เพิ่ม</button>
-        </div>
-      </div>
-      <div id="assignment-list" class="rounded-2xl overflow-hidden shadow-sm border border-gray-100"></div>
-    </section>
-
-    <section id="tab-manage-students" class="hidden">
-      <div class="hw-card p-5 space-y-4 bg-white mb-4">
-        <h3 class="font-bold text-gray-800 flex items-center gap-2"><i data-lucide="user-plus" class="text-green-500"></i> เพิ่มห้อง/นักเรียน</h3>
-        <p class="text-xs text-gray-500">*ใส่เฉพาะชื่อห้องเพื่อสร้างห้องเรียนใหม่ได้</p>
-        <div class="flex gap-2">
-          <input id="new-student" type="text" class="hw-input flex-1" placeholder="ชื่อ-สกุล (เว้นว่างได้)"> 
-          <input id="new-student-class" type="text" class="hw-input w-24" placeholder="เช่น ม.3/7"> 
-          <button id="add-student-btn" class="bg-green-500 text-white px-4 rounded-xl text-xs font-semibold hover:bg-green-600 transition">เพิ่ม</button>
-        </div>
-      </div>
-      <div id="student-list" class="rounded-2xl overflow-hidden shadow-sm border border-gray-100"></div>
-    </section>
+    </div>
   </main>
 
+  <div id="toast" class="fixed top-12 left-1/2 -translate-x-1/2 bg-gray-900/95 backdrop-blur-sm text-white px-6 py-3.5 rounded-2xl shadow-2xl hidden text-sm font-medium z-50 text-center max-w-[90%] w-max transition-all duration-300 border border-gray-800"></div>
+
   <script>
-    // *อย่าลืมเช็คว่า URL นี้ตรงกับ Script ของคุณครูนะครับ*
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz3CvKgcXVrTSxk8aWvgAJghoZ_EdKIxYwvt7BstBblcv1xwaCt2-c-4HAtOvUPYG7k8g/exec';
+    // 🔗 ตรวจสอบ URL Web App ของคุณครูให้เรียบร้อยนะครับ
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbygfNucbEhVTfRP5zuYW05sw3M4-L_RvwtvJEGCyPsVBTKq3tFGZg71p-W0rwrpD9uikA/exec';
+    
+    let globalData = [];
 
-    let allSubmissions = []; let allAssignments = []; let allStudents = [];
-
-    async function loadAllData() {
-      lucide.createIcons();
-      document.getElementById('report-content').innerHTML = 'กำลังโหลดข้อมูล...';
+    window.onload = async function() {
       try {
-        const response = await fetch(SCRIPT_URL); 
-        const data = await response.json();
-        allSubmissions = data.filter(d => d.type === 'submission');
-        allAssignments = data.filter(d => d.type === 'assignment');
-        allStudents = data.filter(d => d.type === 'student');
+        const response = await fetch(`${SCRIPT_URL}?type=init`);
+        globalData = await response.json();
         
-        const classrooms = [...new Set(allStudents.map(s => s.classroom).filter(c => c && c.trim() !== ''))].sort();
-        document.getElementById('filter-classroom').innerHTML = '<option value="">ทุกห้อง</option>' + classrooms.map(c => `<option value="${c}">${c}</option>`).join('');
-        document.getElementById('filter-assignment').innerHTML = '<option value="">ทุกงาน</option>' + allAssignments.map(a => `<option value="${a.name}">${a.name}</option>`).join('');
-
-        renderReport(); renderAssignmentList(); renderStudentList();
-      } catch(e) { document.getElementById('report-content').innerHTML = '<p class="text-red-500 text-center">เกิดข้อผิดพลาดในการโหลดข้อมูล</p>'; }
-    }
-
-    function renderReport() {
-      const fc = document.getElementById('filter-classroom').value; 
-      const fa = document.getElementById('filter-assignment').value;
-      let filtered = allSubmissions.filter(d => (!fc || d.classroom === fc) && (!fa || d.assignment === fa));
-      filtered.reverse(); // แสดงข้อมูลล่าสุดขึ้นก่อน
-
-      const container = document.getElementById('report-content');
-      if (filtered.length === 0) { container.innerHTML = '<p class="text-center py-6 text-gray-400 text-sm">ยังไม่มีข้อมูลการส่งงาน</p>'; return; }
-
-      container.innerHTML = filtered.map(item => `
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 text-sm space-y-2 hw-card hover:border-blue-200 transition">
-          <div class="flex justify-between items-start gap-2 font-bold">
-            <span class="text-gray-900 leading-snug">
-              <span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-md text-xs mr-1">เลขที่ ${item.student_number}</span> 
-              ${item.student_name} <span class="text-gray-500 font-normal">(${item.classroom})</span>
-            </span>
-            <span class="text-blue-600 text-right whitespace-nowrap bg-blue-50 px-2 py-1 rounded-md text-xs">${item.assignment}</span>
-          </div>
-          <div class="text-gray-400 text-xs flex items-center gap-1.5"><i data-lucide="calendar" style="width:12px;height:12px;"></i> ${item.submitted_date}</div>
-          ${item.link ? `<div class="text-xs flex items-center gap-1.5"><i data-lucide="link" style="width:12px;height:12px;"></i> <a href="${item.link}" target="_blank" class="text-blue-500 underline break-all">${item.link}</a></div>` : ''}
-          ${item.file_url ? `<div class="mt-2"><a href="${item.file_url}" target="_blank" class="text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-xl inline-flex items-center gap-1.5 font-medium transition text-xs whitespace-nowrap"><i data-lucide="file-text" style="width:14px;height:14px;"></i> เปิดไฟล์แนบ</a></div>` : ''}
-        </div>`).join('');
-      lucide.createIcons();
-    }
-
-    function renderAssignmentList() { 
-      const container = document.getElementById('assignment-list'); 
-      if(allAssignments.length === 0) { container.innerHTML = '<div class="p-4 text-center text-gray-400 text-sm bg-white">ไม่มีข้อมูลชิ้นงาน</div>'; return; } 
-      container.innerHTML = allAssignments.map(a => `<div class="hw-list-item flex justify-between items-center hover:bg-gray-50 transition"><span class="text-sm font-medium text-gray-900">${a.name}</span><button onclick="removeItem('assignments', '${a.id}')" class="text-red-500 text-xs font-semibold px-2 py-1 bg-red-50 hover:bg-red-100 transition rounded-lg flex items-center gap-1"><i data-lucide="trash-2" style="width:14px;height:14px;"></i> ลบ</button></div>`).join(''); lucide.createIcons(); 
-    }
-    
-    function renderStudentList() { 
-      const container = document.getElementById('student-list'); 
-      if(allStudents.length === 0) { container.innerHTML = '<div class="p-4 text-center text-gray-400 text-sm bg-white">ไม่มีข้อมูลนักเรียน</div>'; return; } 
-      container.innerHTML = allStudents.map(s => `<div class="hw-list-item flex justify-between items-center hover:bg-gray-50 transition"><span class="text-sm font-medium text-gray-900">${s.name || '<span class="text-gray-400">(ไม่มีชื่อ)</span>'} <span class="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full ml-2">${s.classroom}</span></span><button onclick="removeItem('students', '${s.id}')" class="text-red-500 text-xs font-semibold px-2 py-1 bg-red-50 hover:bg-red-100 transition rounded-lg flex items-center gap-1"><i data-lucide="trash-2" style="width:14px;height:14px;"></i> ลบ</button></div>`).join(''); lucide.createIcons(); 
-    }
-    
-    window.removeItem = async function(type, id) { 
-      if(!id || id === 'undefined') return; 
-      if(confirm('ยืนยันการลบข้อมูลนี้หรือไม่?')) { 
-        try { 
-          await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'delete', type: type, id: id }) }); 
-          loadAllData(); 
-        } catch(e) { alert('ไม่สามารถลบได้'); } 
-      } 
+        const classrooms = [...new Set(globalData.filter(d => d.type === 'student').map(d => d.classroom))].sort();
+        const selectClass = document.getElementById('selectClass');
+        selectClass.innerHTML = '<option value="">-- เลือกห้องเรียน --</option>';
+        classrooms.forEach(c => selectClass.add(new Option(c, c)));
+      } catch (e) {
+        showToast('❌ ไม่สามารถเชื่อมต่อฐานข้อมูลได้');
+      }
     };
 
-    document.getElementById('add-assignment-btn').addEventListener('click', async () => { 
-      const input = document.getElementById('new-assignment'); 
-      if (!input.value.trim()) return; 
-      const btn = document.getElementById('add-assignment-btn'); btn.disabled = true; btn.innerText = '..';
-      try { 
-        await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'create', record: { type: 'assignment', name: input.value.trim() } }) }); 
-        input.value = ''; loadAllData(); 
-      } catch(e) {} 
-      btn.disabled = false; btn.innerText = 'เพิ่ม';
-    });
+    function updateAssignmentDropdown() {
+      const selectedClass = document.getElementById('selectClass').value;
+      const selectAssignment = document.getElementById('selectAssignment');
+      
+      if (!selectedClass) {
+        selectAssignment.innerHTML = '<option value="">-- เลือกห้องก่อน --</option>';
+        selectAssignment.disabled = true;
+        document.getElementById('tableContainer').classList.add('hidden');
+        return;
+      }
+      
+      const assignments = globalData.filter(d => d.type === 'assignment' && d.classroom === selectedClass && d.status !== '-');
+      selectAssignment.innerHTML = '<option value="">-- เลือกชิ้นงาน --</option>';
+      assignments.forEach(a => selectAssignment.add(new Option(a.name, a.name)));
+      selectAssignment.disabled = false;
+      document.getElementById('tableContainer').classList.add('hidden');
+    }
 
-    document.getElementById('add-student-btn').addEventListener('click', async () => { 
-      const nameEl = document.getElementById('new-student'); const classEl = document.getElementById('new-student-class'); 
-      if (!classEl.value.trim()) return alert("กรุณาใส่ชื่อห้องเรียนด้วยครับ"); 
-      const btn = document.getElementById('add-student-btn'); btn.disabled = true; btn.innerText = '..';
-      try { 
-        await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'create', record: { type: 'student', name: nameEl.value.trim(), classroom: classEl.value.trim() } }) }); 
-        nameEl.value = ''; loadAllData(); 
-      } catch(e) {} 
-      btn.disabled = false; btn.innerText = 'เพิ่ม';
-    });
+    function showToast(msg, isError = false) {
+      const t = document.getElementById('toast');
+      t.textContent = msg; 
+      t.style.backgroundColor = isError ? "rgba(220, 38, 38, 0.95)" : "rgba(17, 24, 39, 0.95)";
+      t.classList.remove('hidden');
+      void t.offsetWidth; 
+      t.style.opacity = '1';
+      t.style.transform = 'translate(-50%, 0) scale(1)';
+      setTimeout(() => {
+        t.style.opacity = '0';
+        t.style.transform = 'translate(-50%, -10px) scale(0.95)';
+        setTimeout(() => t.classList.add('hidden'), 300);
+      }, 3000);
+    }
 
-    document.querySelectorAll('.hw-segment button').forEach(btn => { 
-      btn.addEventListener('click', () => { 
-        document.querySelectorAll('.hw-segment button').forEach(b => b.classList.remove('active')); btn.classList.add('active'); 
-        ['report','manage-assignments','manage-students'].forEach(t => document.getElementById('tab-' + t).classList.add('hidden')); 
-        document.getElementById('tab-' + btn.dataset.tab).classList.remove('hidden'); 
-      }); 
-    });
+    function getDirectImgUrl(driveUrl) {
+      if (!driveUrl || driveUrl === '-' || driveUrl.trim() === '') return '';
+      const match = driveUrl.match(/[-\w]{25,}/);
+      if (match) {
+        const fileId = match[0];
+        return `https://drive.google.com/uc?export=view&id=${fileId}`;
+      }
+      return driveUrl; 
+    }
 
-    document.getElementById('filter-classroom').addEventListener('change', renderReport); 
-    document.getElementById('filter-assignment').addEventListener('change', renderReport);
-    
-    window.onload = loadAllData;
+    // 🚀 เพิ่มประสิทธิภาพสูงสุด: ใช้ loading="lazy" ช่วยให้หน้าเว็บเด้งขึ้นมาทันที ไม่ค้างรอโหลดรูปภาพพร้อมกันคราวละมากๆ
+    async function loadAdminTable() {
+      const classroom = document.getElementById('selectClass').value;
+      const assignment = document.getElementById('selectAssignment').value;
+      
+      if (!classroom || !assignment) {
+        showToast('❌ กรุณาเลือกห้องและชิ้นงานให้ครบถ้วน', true);
+        return;
+      }
+
+      const tbody = document.getElementById('studentTableBody');
+      const tableContainer = document.getElementById('tableContainer');
+      const fetchBtn = document.getElementById('fetchBtn');
+
+      fetchBtn.disabled = true;
+      fetchBtn.innerText = '⏳ กำลังดึงข้อมูล...';
+      tableContainer.classList.remove('hidden');
+      tbody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-gray-500 font-medium animate-pulse text-lg">กำลังโหลดข้อมูลนักเรียนห้อง ${classroom}...</td></tr>`;
+
+      try {
+        const response = await fetch(`${SCRIPT_URL}?action=getAdminView&classroom=${encodeURIComponent(classroom)}&assignment=${encodeURIComponent(assignment)}`);
+        const result = await response.json();
+
+        if(result.isOk) {
+          tbody.innerHTML = '';
+          result.data.forEach(std => {
+            let imgHTML = '<span class="text-gray-400 text-sm">ไม่มีรูป</span>';
+            let statusBadge = '<span class="bg-red-100 text-red-600 px-3 py-1.5 rounded-full text-xs font-bold border border-red-200">ยังไม่ส่ง</span>';
+            
+            if (std.isSubmitted) {
+              statusBadge = `
+                <div class="flex flex-col items-center gap-1.5">
+                  <span class="bg-green-100 text-green-700 px-3 py-1.5 rounded-full text-xs font-bold border border-green-200">ส่งแล้ว</span>
+                  <span class="text-[11px] text-gray-500 font-mono">${std.submittedDate}</span>
+                </div>`;
+              
+              const directImgUrl = getDirectImgUrl(std.fileUrl);
+              
+              if(directImgUrl) {
+                // 🎯 บังคับทำเป็นแท็ก <img> พร้อมระบุ loading="lazy" ภาพจะโหลดเมื่อคุณครูเลื่อนเจอเท่านั้น
+                imgHTML = `
+                  <a href="${std.fileUrl}" target="_blank" class="flex justify-center">
+                    <img src="${directImgUrl}" loading="lazy" class="img-preview shadow-sm" title="คลิกเพื่อเปิดดูขนาดเต็ม" onerror="this.onerror=null; this.outerHTML='<a href=&quot;${std.fileUrl}&quot; target=&quot;_blank&quot; class=&quot;text-blue-600 underline text-sm font-semibold hover:text-blue-800&quot;>เปิดดูรูปผลงาน</a>';">
+                  </a>`;
+              }
+            }
+
+            const row = `
+              <tr class="hover:bg-blue-50/40 transition-colors">
+                <td class="py-4 px-4 text-center font-bold text-gray-700 text-lg">${std.number}</td>
+                <td class="py-4 px-4 font-semibold text-gray-800">${std.name}</td>
+                <td class="py-4 px-4 text-center">${statusBadge}</td>
+                <td class="py-4 px-4 text-center">${imgHTML}</td>
+                <td class="py-4 px-4">
+                  <div class="flex items-center justify-start gap-2">
+                    <input type="number" id="score_${std.number}" class="hw-input py-2.5 px-3 w-24 text-center font-bold text-blue-700 text-lg border-2 border-gray-200" value="${std.score}" placeholder="-">
+                    <button onclick="saveScore('${classroom}', '${std.number}', '${std.name}', '${assignment}')" class="btn-tactile bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl text-sm font-bold shadow-sm">
+                      บันทึก
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            `;
+            tbody.insertAdjacentHTML('beforeend', row);
+          });
+          showToast(`✅ โหลดข้อมูลสำเร็จแล้วครับ!`);
+        }
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-red-500 font-bold text-lg">❌ เกิดข้อผิดพลาด กรุณารีเฟรช</td></tr>`;
+      } finally {
+        fetchBtn.disabled = false;
+        fetchBtn.innerText = '🔍 ดึงตารางตรวจงาน';
+      }
+    }
+
+    async function saveScore(classroom, number, name, assignment) {
+      const scoreInput = document.getElementById(`score_${number}`);
+      const btn = scoreInput.nextElementSibling;
+      const score = scoreInput.value;
+      
+      const originalText = btn.innerText;
+      btn.innerText = '⏳...';
+      btn.disabled = true;
+
+      try {
+        const response = await fetch(SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'updateScore', classroom: classroom, number: number, name: name, assignment: assignment, score: score })
+        });
+        
+        const result = await response.json();
+        if(result.isOk) {
+          showToast(`🎉 บันทึกคะแนนเลขที่ ${number} สำเร็จ!`);
+          btn.classList.replace('bg-blue-600', 'bg-green-600');
+          btn.innerText = '✔ สำเร็จ';
+          setTimeout(() => {
+            btn.classList.replace('bg-green-600', 'bg-blue-600');
+            btn.innerText = originalText;
+            btn.disabled = false;
+          }, 1500);
+        } else {
+          showToast('❌ บันทึกไม่สำเร็จ: ' + result.error, true);
+          btn.innerText = originalText; btn.disabled = false;
+        }
+      } catch (e) {
+        showToast('❌ การเชื่อมต่อล้มเหลว', true);
+        btn.innerText = originalText; btn.disabled = false;
+      }
+    }
   </script>
 </body>
 </html>

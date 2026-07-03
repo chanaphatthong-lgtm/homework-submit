@@ -2,32 +2,42 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>ระบบตรวจงานแอดมิน - ครูเกมส์</title>
-  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  
   <style>
     * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
     html, body { 
       overflow-x: hidden; 
       font-family: 'DM Sans', sans-serif; 
-      -webkit-font-smoothing: antialiased; 
+      -webkit-font-smoothing: antialiased; /* ทำให้ฟอนต์เนียนตา */
+      -moz-osx-font-smoothing: grayscale;
       scroll-behavior: smooth; 
+      -webkit-text-size-adjust: 100%;
     }
+    
     .hw-card { 
       background: rgba(255,255,255,0.95); 
       border: 1px solid rgba(0,0,0,0.04); 
-      border-radius: 20px; 
+      border-radius: 24px; 
       box-shadow: 0 4px 20px rgba(30,64,175,0.05); 
     }
+    
     .hw-input { 
       background: rgba(118,118,128,0.06); 
       border: 2px solid transparent; 
-      border-radius: 12px; 
-      padding: 12px 16px; 
-      font-size: 15px; 
+      border-radius: 14px; 
+      padding: 16px 20px; 
+      font-size: 16px; 
       width: 100%; 
-      transition: all 0.3s; 
+      /* 🚀 เปลี่ยนจาก all เป็นเฉพาะค่าที่ใช้ ลดภาระ CPU */
+      transition: background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease; 
     }
     .hw-input:focus { 
       background: #ffffff; 
@@ -35,90 +45,113 @@
       box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15); 
       outline: none; 
     }
-    .btn-tactile { transition: all 0.2s; }
-    .btn-tactile:active { transform: scale(0.96) translateY(2px); }
+    
+    .btn-tactile { 
+      /* 🚀 บังคับใช้ GPU ประมวลผลแอนิเมชัน */
+      transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), filter 0.2s ease, background-color 0.2s ease;
+      will-change: transform;
+      transform: translateZ(0); 
+    }
+    .btn-tactile:active { transform: scale(0.95) translateY(2px) translateZ(0); }
     .btn-tactile:hover { filter: brightness(1.05); }
     
-    /* 🎯 ตกแต่งช่องรูปภาพแสดงผล และทำเอฟเฟกต์ขยายเมื่อเอาเมาส์ชี้ */
     .img-preview {
-        width: 80px;
-        height: 80px;
+        width: 90px;
+        height: 90px;
         object-fit: cover;
-        border-radius: 12px;
-        transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease;
-        cursor: pointer;
+        border-radius: 14px;
         border: 2px solid #e5e7eb;
+        /* 🚀 ใช้ Cubic-bezier ให้การเด้งสมูทเหมือนสปริง และบังคับ GPU rendering */
+        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+        will-change: transform, box-shadow;
+        transform: translateZ(0);
+        backface-visibility: hidden; /* ป้องกันภาพกระพริบตอนขยายบน iPad */
+        cursor: pointer;
     }
-    .img-preview:hover {
-        transform: scale(3.5);
+    .img-preview:hover, .img-preview:active {
+        transform: scale(3.5) translateZ(0);
         z-index: 50;
         position: relative;
-        box-shadow: 0 12px 20px -3px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 12px 25px -5px rgba(0, 0, 0, 0.4);
         border-color: #3b82f6;
     }
+    
+    /* 🚀 ปรับแต่ง Scrollbar ให้ลื่นและดูดีขึ้น */
     ::-webkit-scrollbar { width: 8px; height: 8px; }
-    ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
-    ::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 10px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.5); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(107, 114, 128, 0.8); }
+    
+    /* 🚀 คลาสแอนิเมชันสำหรับ Toast ให้ประมวลผลด้วย GPU */
+    .toast-animate {
+      will-change: transform, opacity;
+      transform: translate(-50%, -20px) scale(0.95) translateZ(0);
+      opacity: 0;
+      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.35s ease;
+      pointer-events: none;
+    }
+    .toast-visible {
+      transform: translate(-50%, 0) scale(1) translateZ(0);
+      opacity: 1;
+    }
   </style>
 </head>
 <body class="min-h-screen bg-[#E6F2FB] text-gray-800 pb-10">
   
-  <header class="pt-8 pb-6 px-5 max-w-7xl mx-auto flex flex-col items-center text-center gap-0 relative z-10">
-    <img src="เกมส์_01.png" alt="โลโก้ครูเกมส์" class="w-32 h-32 object-cover drop-shadow-md mb-2" onerror="this.style.display='none'">
-    <h1 class="font-bold text-3xl leading-tight text-gray-900 drop-shadow-sm mb-1">ตรวจงานครูเกมส์</h1>
-    <p class="text-sm mt-1 text-white bg-blue-800 px-5 py-1.5 rounded-full inline-block font-semibold shadow-md">แผงควบคุมแอดมิน (Admin Panel)</p>
+  <header class="pt-10 pb-8 px-6 max-w-7xl mx-auto flex flex-col items-center text-center gap-0 relative z-10">
+    <img src="เกมส์_01.png" alt="โลโก้ครูเกมส์" fetchpriority="high" class="w-36 h-36 object-cover drop-shadow-md mb-3" onerror="this.style.display='none'">
+    <h1 class="font-bold text-4xl leading-tight text-gray-900 drop-shadow-sm mb-2">ตรวจงานครูเกมส์</h1>
+    <p class="text-base mt-1 text-white bg-blue-800 px-6 py-2 rounded-full inline-block font-semibold shadow-md transform translateZ(0)">แผงควบคุมแอดมิน (Admin Panel)</p>
   </header>
 
-  <main class="max-w-7xl mx-auto px-5 space-y-6">
-    
-    <div class="hw-card p-6 relative z-20">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+  <main class="max-w-[95%] xl:max-w-7xl mx-auto px-5 space-y-8 relative z-20">
+    <div class="hw-card p-8">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-end">
         <div>
-          <label class="block text-sm font-bold mb-2 text-gray-600 uppercase">เลือกระดับชั้น / ห้อง</label>
+          <label class="block text-base font-bold mb-3 text-gray-600 uppercase tracking-wide">เลือกระดับชั้น / ห้อง</label>
           <select id="selectClass" class="hw-input" onchange="updateAssignmentDropdown()">
             <option value="">-- กำลังโหลดข้อมูล... --</option>
           </select>
         </div>
         <div>
-          <label class="block text-sm font-bold mb-2 text-gray-600 uppercase">เลือกชิ้นงาน</label>
+          <label class="block text-base font-bold mb-3 text-gray-600 uppercase tracking-wide">เลือกชิ้นงาน (แสดงทั้งหมด)</label>
           <select id="selectAssignment" class="hw-input" disabled>
             <option value="">-- เลือกห้องก่อน --</option>
           </select>
         </div>
         <div>
-          <button id="fetchBtn" onclick="loadAdminTable()" class="btn-tactile w-full bg-blue-700 text-white font-bold text-lg p-3 rounded-xl shadow-md disabled:bg-gray-400">
+          <button id="fetchBtn" onclick="loadAdminTable()" class="btn-tactile w-full bg-blue-700 text-white font-bold text-xl p-4 rounded-xl shadow-md disabled:bg-gray-400 disabled:transform-none">
             🔍 ดึงตารางตรวจงาน
           </button>
         </div>
       </div>
     </div>
 
-    <div id="tableContainer" class="hw-card overflow-hidden hidden transition-all duration-500">
-      <div class="overflow-x-auto w-full p-2">
-        <table class="w-full text-left border-collapse min-w-[800px]">
+    <div id="tableContainer" class="hw-card overflow-hidden transition-all duration-300 opacity-0 h-0 pointer-events-none">
+      <div class="overflow-x-auto w-full p-4">
+        <table class="w-full text-left border-collapse min-w-[900px]">
           <thead>
-            <tr class="bg-gray-100 text-gray-700 text-sm uppercase tracking-wide border-b-2 border-gray-200">
-              <th class="py-4 px-4 font-bold w-[10%] text-center">เลขที่</th>
-              <th class="py-4 px-4 font-bold w-[30%]">ชื่อ - นามสกุล</th>
-              <th class="py-4 px-4 font-bold w-[15%] text-center">สถานะ</th>
-              <th class="py-4 px-4 font-bold w-[20%] text-center">รูปผลงาน</th>
-              <th class="py-4 px-4 font-bold w-[25%]">บันทึกคะแนน</th>
+            <tr class="bg-gray-100 text-gray-700 text-base uppercase tracking-wider border-b-2 border-gray-200">
+              <th class="py-5 px-6 font-bold w-[10%] text-center rounded-tl-xl">เลขที่</th>
+              <th class="py-5 px-6 font-bold w-[30%]">ชื่อ - นามสกุล</th>
+              <th class="py-5 px-6 font-bold w-[15%] text-center">สถานะ</th>
+              <th class="py-5 px-6 font-bold w-[20%] text-center">รูปผลงาน</th>
+              <th class="py-5 px-6 font-bold w-[25%] rounded-tr-xl">บันทึกคะแนน</th>
             </tr>
           </thead>
-          <tbody id="studentTableBody" class="divide-y divide-gray-100 text-base">
-            </tbody>
+          <tbody id="studentTableBody" class="divide-y divide-gray-100 text-lg">
+          </tbody>
         </table>
       </div>
     </div>
   </main>
 
-  <div id="toast" class="fixed top-12 left-1/2 -translate-x-1/2 bg-gray-900/95 backdrop-blur-sm text-white px-6 py-3.5 rounded-2xl shadow-2xl hidden text-sm font-medium z-50 text-center max-w-[90%] w-max transition-all duration-300 border border-gray-800"></div>
+  <div id="toast" class="fixed top-12 left-1/2 bg-gray-900/95 backdrop-blur-md text-white px-8 py-4 rounded-2xl shadow-2xl text-base font-semibold z-50 text-center max-w-[90%] w-max border border-gray-700 toast-animate"></div>
 
   <script>
-    // 🔗 ตรวจสอบ URL Web App ของคุณครูให้เรียบร้อยนะครับ
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbygfNucbEhVTfRP5zuYW05sw3M4-L_RvwtvJEGCyPsVBTKq3tFGZg71p-W0rwrpD9uikA/exec';
-    
     let globalData = [];
+    let toastTimeout;
 
     window.onload = async function() {
       try {
@@ -130,54 +163,63 @@
         selectClass.innerHTML = '<option value="">-- เลือกห้องเรียน --</option>';
         classrooms.forEach(c => selectClass.add(new Option(c, c)));
       } catch (e) {
-        showToast('❌ ไม่สามารถเชื่อมต่อฐานข้อมูลได้');
+        showToast('❌ ไม่สามารถเชื่อมต่อฐานข้อมูลได้', true);
       }
     };
 
     function updateAssignmentDropdown() {
       const selectedClass = document.getElementById('selectClass').value;
       const selectAssignment = document.getElementById('selectAssignment');
+      const tableContainer = document.getElementById('tableContainer');
       
       if (!selectedClass) {
         selectAssignment.innerHTML = '<option value="">-- เลือกห้องก่อน --</option>';
         selectAssignment.disabled = true;
-        document.getElementById('tableContainer').classList.add('hidden');
+        hideTable(tableContainer);
         return;
       }
       
-      const assignments = globalData.filter(d => d.type === 'assignment' && d.classroom === selectedClass && d.status !== '-');
+      const assignments = globalData.filter(d => d.type === 'assignment' && d.classroom === selectedClass);
       selectAssignment.innerHTML = '<option value="">-- เลือกชิ้นงาน --</option>';
       assignments.forEach(a => selectAssignment.add(new Option(a.name, a.name)));
       selectAssignment.disabled = false;
-      document.getElementById('tableContainer').classList.add('hidden');
+      hideTable(tableContainer);
     }
 
+    function hideTable(el) {
+      el.classList.remove('opacity-100', 'h-auto', 'pointer-events-auto');
+      el.classList.add('opacity-0', 'h-0', 'pointer-events-none');
+    }
+    
+    function showTable(el) {
+      el.classList.remove('opacity-0', 'h-0', 'pointer-events-none');
+      el.classList.add('opacity-100', 'h-auto', 'pointer-events-auto');
+    }
+
+    // 🚀 ระบบแจ้งเตือนที่เขียนใหม่ด้วย CSS Transform ลดการกระตุก 100%
     function showToast(msg, isError = false) {
       const t = document.getElementById('toast');
+      clearTimeout(toastTimeout);
+      
       t.textContent = msg; 
       t.style.backgroundColor = isError ? "rgba(220, 38, 38, 0.95)" : "rgba(17, 24, 39, 0.95)";
-      t.classList.remove('hidden');
+      t.style.borderColor = isError ? "rgba(185, 28, 28, 1)" : "rgba(55, 65, 81, 1)";
+      
+      // บังคับให้เบราว์เซอร์คำนวณตำแหน่งใหม่ (Reflow) ก่อนเล่นแอนิเมชัน
       void t.offsetWidth; 
-      t.style.opacity = '1';
-      t.style.transform = 'translate(-50%, 0) scale(1)';
-      setTimeout(() => {
-        t.style.opacity = '0';
-        t.style.transform = 'translate(-50%, -10px) scale(0.95)';
-        setTimeout(() => t.classList.add('hidden'), 300);
+      t.classList.add('toast-visible');
+      
+      toastTimeout = setTimeout(() => {
+        t.classList.remove('toast-visible');
       }, 3000);
     }
 
     function getDirectImgUrl(driveUrl) {
       if (!driveUrl || driveUrl === '-' || driveUrl.trim() === '') return '';
       const match = driveUrl.match(/[-\w]{25,}/);
-      if (match) {
-        const fileId = match[0];
-        return `https://drive.google.com/uc?export=view&id=${fileId}`;
-      }
-      return driveUrl; 
+      return match ? `https://drive.google.com/uc?export=view&id=${match[0]}` : driveUrl; 
     }
 
-    // 🚀 เพิ่มประสิทธิภาพสูงสุด: ใช้ loading="lazy" ช่วยให้หน้าเว็บเด้งขึ้นมาทันที ไม่ค้างรอโหลดรูปภาพพร้อมกันคราวละมากๆ
     async function loadAdminTable() {
       const classroom = document.getElementById('selectClass').value;
       const assignment = document.getElementById('selectAssignment').value;
@@ -193,59 +235,58 @@
 
       fetchBtn.disabled = true;
       fetchBtn.innerText = '⏳ กำลังดึงข้อมูล...';
-      tableContainer.classList.remove('hidden');
-      tbody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-gray-500 font-medium animate-pulse text-lg">กำลังโหลดข้อมูลนักเรียนห้อง ${classroom}...</td></tr>`;
+      showTable(tableContainer);
+      tbody.innerHTML = `<tr><td colspan="5" class="text-center py-12 text-gray-500 font-medium animate-pulse text-xl">กำลังโหลดข้อมูลนักเรียนห้อง ${classroom}...</td></tr>`;
 
       try {
         const response = await fetch(`${SCRIPT_URL}?action=getAdminView&classroom=${encodeURIComponent(classroom)}&assignment=${encodeURIComponent(assignment)}`);
         const result = await response.json();
 
         if(result.isOk) {
-          tbody.innerHTML = '';
-          result.data.forEach(std => {
+          // 🚀 DOM Batching: สร้างชุดโค้ดทั้งหมดก่อนแล้วค่อยสั่งยัดเข้าหน้าเว็บทีเดียว ไวกว่าการ insert ทีละบรรทัดหลายเท่าตัว
+          const rowsHTML = result.data.map(std => {
             let imgHTML = '<span class="text-gray-400 text-sm">ไม่มีรูป</span>';
-            let statusBadge = '<span class="bg-red-100 text-red-600 px-3 py-1.5 rounded-full text-xs font-bold border border-red-200">ยังไม่ส่ง</span>';
+            let statusBadge = '<span class="bg-red-50 text-red-600 px-4 py-2 rounded-full text-sm font-bold border border-red-200">ยังไม่ส่ง</span>';
             
             if (std.isSubmitted) {
               statusBadge = `
-                <div class="flex flex-col items-center gap-1.5">
-                  <span class="bg-green-100 text-green-700 px-3 py-1.5 rounded-full text-xs font-bold border border-green-200">ส่งแล้ว</span>
-                  <span class="text-[11px] text-gray-500 font-mono">${std.submittedDate}</span>
+                <div class="flex flex-col items-center gap-2">
+                  <span class="bg-green-50 text-green-700 px-4 py-2 rounded-full text-sm font-bold border border-green-200">ส่งแล้ว</span>
+                  <span class="text-xs text-gray-500 font-mono">${std.submittedDate}</span>
                 </div>`;
               
               const directImgUrl = getDirectImgUrl(std.fileUrl);
-              
               if(directImgUrl) {
-                // 🎯 บังคับทำเป็นแท็ก <img> พร้อมระบุ loading="lazy" ภาพจะโหลดเมื่อคุณครูเลื่อนเจอเท่านั้น
                 imgHTML = `
                   <a href="${std.fileUrl}" target="_blank" class="flex justify-center">
-                    <img src="${directImgUrl}" loading="lazy" class="img-preview shadow-sm" title="คลิกเพื่อเปิดดูขนาดเต็ม" onerror="this.onerror=null; this.outerHTML='<a href=&quot;${std.fileUrl}&quot; target=&quot;_blank&quot; class=&quot;text-blue-600 underline text-sm font-semibold hover:text-blue-800&quot;>เปิดดูรูปผลงาน</a>';">
+                    <img src="${directImgUrl}" loading="lazy" class="img-preview" title="คลิกเพื่อเปิดดูขนาดเต็ม" onerror="this.onerror=null; this.outerHTML='<a href=&quot;${std.fileUrl}&quot; target=&quot;_blank&quot; class=&quot;text-blue-600 underline text-sm font-semibold hover:text-blue-800&quot;>เปิดดูรูปผลงาน</a>';">
                   </a>`;
               }
             }
 
-            const row = `
-              <tr class="hover:bg-blue-50/40 transition-colors">
-                <td class="py-4 px-4 text-center font-bold text-gray-700 text-lg">${std.number}</td>
-                <td class="py-4 px-4 font-semibold text-gray-800">${std.name}</td>
-                <td class="py-4 px-4 text-center">${statusBadge}</td>
-                <td class="py-4 px-4 text-center">${imgHTML}</td>
-                <td class="py-4 px-4">
-                  <div class="flex items-center justify-start gap-2">
-                    <input type="number" id="score_${std.number}" class="hw-input py-2.5 px-3 w-24 text-center font-bold text-blue-700 text-lg border-2 border-gray-200" value="${std.score}" placeholder="-">
-                    <button onclick="saveScore('${classroom}', '${std.number}', '${std.name}', '${assignment}')" class="btn-tactile bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl text-sm font-bold shadow-sm">
+            return `
+              <tr class="hover:bg-blue-50/50 transition-colors duration-200">
+                <td class="py-5 px-6 text-center font-bold text-gray-700 text-xl">${std.number}</td>
+                <td class="py-5 px-6 font-semibold text-gray-800">${std.name}</td>
+                <td class="py-5 px-6 text-center">${statusBadge}</td>
+                <td class="py-5 px-6 text-center">${imgHTML}</td>
+                <td class="py-5 px-6">
+                  <div class="flex items-center justify-start gap-3">
+                    <input type="number" id="score_${std.number}" class="hw-input !py-3 !px-4 !w-28 text-center font-bold text-blue-700 text-xl border-2 border-gray-200" value="${std.score}" placeholder="-">
+                    <button onclick="saveScore('${classroom}', '${std.number}', '${std.name}', '${assignment}')" class="btn-tactile bg-blue-600 hover:bg-blue-700 text-white px-6 py-3.5 rounded-xl text-base font-bold shadow-sm min-w-[100px]">
                       บันทึก
                     </button>
                   </div>
                 </td>
               </tr>
             `;
-            tbody.insertAdjacentHTML('beforeend', row);
-          });
+          }).join(''); // รวม HTML Array ให้เป็น String ก้อนเดียว
+
+          tbody.innerHTML = rowsHTML; // วาดหน้าจอครั้งเดียวจบ
           showToast(`✅ โหลดข้อมูลสำเร็จแล้วครับ!`);
         }
       } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-red-500 font-bold text-lg">❌ เกิดข้อผิดพลาด กรุณารีเฟรช</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-12 text-red-500 font-bold text-xl">❌ เกิดข้อผิดพลาด กรุณารีเฟรช</td></tr>`;
       } finally {
         fetchBtn.disabled = false;
         fetchBtn.innerText = '🔍 ดึงตารางตรวจงาน';
@@ -260,6 +301,7 @@
       const originalText = btn.innerText;
       btn.innerText = '⏳...';
       btn.disabled = true;
+      btn.classList.add('opacity-80'); // ลดแสงปุ่มระหว่างบันทึก
 
       try {
         const response = await fetch(SCRIPT_URL, {
@@ -270,20 +312,23 @@
         const result = await response.json();
         if(result.isOk) {
           showToast(`🎉 บันทึกคะแนนเลขที่ ${number} สำเร็จ!`);
-          btn.classList.replace('bg-blue-600', 'bg-green-600');
+          btn.classList.replace('bg-blue-600', 'bg-emerald-500');
+          btn.classList.replace('hover:bg-blue-700', 'hover:bg-emerald-600');
           btn.innerText = '✔ สำเร็จ';
           setTimeout(() => {
-            btn.classList.replace('bg-green-600', 'bg-blue-600');
+            btn.classList.replace('bg-emerald-500', 'bg-blue-600');
+            btn.classList.replace('hover:bg-emerald-600', 'hover:bg-blue-700');
             btn.innerText = originalText;
             btn.disabled = false;
+            btn.classList.remove('opacity-80');
           }, 1500);
         } else {
           showToast('❌ บันทึกไม่สำเร็จ: ' + result.error, true);
-          btn.innerText = originalText; btn.disabled = false;
+          btn.innerText = originalText; btn.disabled = false; btn.classList.remove('opacity-80');
         }
       } catch (e) {
         showToast('❌ การเชื่อมต่อล้มเหลว', true);
-        btn.innerText = originalText; btn.disabled = false;
+        btn.innerText = originalText; btn.disabled = false; btn.classList.remove('opacity-80');
       }
     }
   </script>

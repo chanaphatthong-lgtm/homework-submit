@@ -329,8 +329,9 @@
       }, 3500); 
     }
 
+    // 🚀 เพิ่ม reject เพื่อป้องกันโค้ดค้างเวลามือถืออ่านไฟล์ภาพไม่ได้
     function compressImage(file) {
-      return new Promise((resolve) => {
+      return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onload = function (event) {
@@ -352,6 +353,12 @@
             const dataUrl = canvas.toDataURL('image/jpeg', 0.5); 
             resolve(dataUrl);
           };
+          img.onerror = function() {
+            reject(new Error("ไม่สามารถอ่านรูปภาพนี้ได้ อาจเป็นไฟล์ที่ไม่รองรับ"));
+          };
+        };
+        reader.onerror = function() {
+          reject(new Error("เบราว์เซอร์ไม่สามารถโหลดไฟล์ได้"));
         };
       });
     }
@@ -375,7 +382,7 @@
       }
 
       btn.disabled = true; 
-      btn.innerHTML = `<span class="flex items-center justify-center gap-2 text-sm"><svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> กำลังส่งเบื้องหลัง...</span>`;
+      btn.innerHTML = `<span class="flex items-center justify-center gap-2 text-sm"><svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> กำลังส่งข้อมูล กรุณารอสักครู่...</span>`;
       
       await new Promise(resolve => setTimeout(resolve, 50));
 
@@ -401,11 +408,13 @@
           }
         };
 
-        fetch(SCRIPT_URL, {
+        // 🚀 บังคับให้เบราว์เซอร์ "รอ" จนกว่าฝั่ง Google จะตอบรับกลับมาว่าเสร็จแล้ว
+        await fetch(SCRIPT_URL, {
           method: 'POST',
           body: JSON.stringify(payload)
-        }).catch(err => console.error("Background upload error:", err));
+        });
 
+        // หลังจากบันทึกเสร็จ ค่อยรีเซ็ตฟอร์ม
         showToast(`🎉 ส่งงานของ ${studentName} สำเร็จเรียบร้อย!`);
         document.getElementById('upload-form').reset();
         
@@ -423,7 +432,8 @@
         btn.innerText = 'ส่งงาน';
 
       } catch (err) { 
-        showToast('❌ เกิดข้อผิดพลาดในการเตรียมไฟล์'); 
+        console.error(err);
+        showToast('❌ การส่งล้มเหลว: ' + (err.message || 'โปรดลองส่งใหม่อีกครั้ง')); 
         btn.disabled = false; 
         btn.innerText = 'ส่งงาน';
       }

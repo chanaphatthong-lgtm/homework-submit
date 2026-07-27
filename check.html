@@ -7,7 +7,6 @@
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    /* ⚡ พื้นฐาน และ Smooth Scrolling */
     * {
       -webkit-tap-highlight-color: transparent;
       font-family: 'DM Sans', sans-serif;
@@ -20,63 +19,33 @@
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
       scroll-behavior: smooth;
-      /* ⚡ ป้องกัน Android ขยายฟอนต์และ UI ผิดปกติ */
-      -webkit-text-size-adjust: 100% !important;
-      -moz-text-size-adjust: 100% !important;
-      -ms-text-size-adjust: 100% !important;
-      text-size-adjust: 100% !important;
     }
-    
-    /* ⚡ ช่อง Input เด้งสปริงแบบ 60FPS และล็อกขนาดสำหรับ Android */
     .hw-input {
       background: rgba(118,118,128,0.06);
       border: 2px solid transparent;
       border-radius: 12px;
       padding: 12px 16px;
-      font-size: 15px !important; /* ล็อกขนาดฟอนต์ */
+      font-size: 15px !important;
       line-height: 1.2;
       width: 100%;
-      height: 48px; /* ล็อกความสูงป้องกันการถูกบีบขยาย */
-      transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      will-change: transform, box-shadow, border-color;
-      transform: translateZ(0);
-      backface-visibility: hidden;
+      height: 48px;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
     .hw-input:focus {
       background: #ffffff;
       border-color: #293B86;
       box-shadow: 0 8px 25px rgba(41, 59, 134, 0.15);
-      transform: scale(1.02) translateZ(0);
       outline: none;
     }
-    
-    /* ⚡ ปุ่มกด Tactical เด้งลื่นไหล */
     .btn-tactile {
-      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.3s ease, box-shadow 0.3s ease;
-      will-change: transform, filter, box-shadow;
-      transform: scale(1) translateZ(0);
-      backface-visibility: hidden;
-      perspective: 1000px;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
-    .btn-tactile:hover {
-      transform: scale(1.03) translateZ(0);
-      filter: brightness(1.03);
-    }
-    .btn-tactile:active {
-      transform: scale(0.96) translateY(2px) translateZ(0);
-    }
-    .btn-tactile:disabled {
-      transform: translateZ(0) !important;
-      box-shadow: none !important;
-      filter: grayscale(1);
-      opacity: 0.6;
-    }
+    .btn-tactile:hover { transform: scale(1.03); filter: brightness(1.03); }
+    .btn-tactile:active { transform: scale(0.96) translateY(2px); }
+    .btn-tactile:disabled { transform: none; filter: grayscale(1); opacity: 0.6; }
     
-    /* ⚡ ล้างสไตล์ Select บนเบราว์เซอร์มือถือทั้งหมด */
     select.hw-input {
       appearance: none !important;
-      -webkit-appearance: none !important;
-      -moz-appearance: none !important;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
       background-repeat: no-repeat !important;
       background-position: right 16px center !important;
@@ -92,34 +61,28 @@
       overflow: hidden;
     }
     
-    /* ⚡ การ์ดโฮเวอร์อัปเกรด 60FPS */
     .card-hover {
-      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
-      will-change: transform, box-shadow;
-      transform: translateY(0) translateZ(0);
-      backface-visibility: hidden;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
     .card-hover:hover {
-      transform: translateY(-4px) translateZ(0);
-      box-shadow: 0 12px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 25px -5px rgba(0, 0, 0, 0.08);
     }
 
-    /* ⚡ แอนิเมชันตอนการ์ดผลลัพธ์ฉีดเข้าหน้าจอแบบนุ่มนวล */
     .fade-in-up {
       animation: fadeInUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
       opacity: 0;
-      will-change: transform, opacity;
     }
     @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(15px) translateZ(0); }
-      to { opacity: 1; transform: translateY(0) translateZ(0); }
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
-<body class="min-h-screen text-gray-800" ontouchstart="">
+<body class="min-h-screen text-gray-800">
 
   <nav id="back-nav" class="pt-6 px-5 max-w-lg mx-auto flex items-center">
-    <button onclick="goBack()" class="btn-tactile flex items-center justify-center w-10 h-10 bg-white rounded-full shadow-sm text-[#293B86] hover:bg-gray-50 border border-gray-100 transition-colors" aria-label="ย้อนกลับไปหน้าส่งงาน">
+    <button onclick="goBack()" class="btn-tactile flex items-center justify-center w-10 h-10 bg-white rounded-full shadow-sm text-[#293B86] hover:bg-gray-50 border border-gray-100 transition-colors">
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
       </svg>
@@ -133,7 +96,7 @@
 
   <main class="max-w-lg mx-auto px-5 pb-10 space-y-5">
     
-    <div id="search-container" class="bg-white p-7 rounded-[1.5rem] shadow-sm border border-gray-50 relative overflow-hidden transform translate-z-0">
+    <div id="search-container" class="bg-white p-7 rounded-[1.5rem] shadow-sm border border-gray-50 relative overflow-hidden">
       
       <div id="loading-skeleton" class="absolute inset-0 bg-white z-10 p-7 rounded-[1.5rem] transition-opacity duration-500">
         <div class="animate-pulse space-y-4">
@@ -174,12 +137,10 @@
       <div class="bg-gradient-to-br from-[#293B86] to-[#1f2d6b] p-6 rounded-[1.5rem] shadow-xl shadow-blue-900/20 text-white space-y-4 card-hover fade-in-up">
         <div class="flex justify-between items-start">
           <div>
-            <p class="text-[11px] text-blue-200 opacity-90 mb-0.5 font-medium">ข้อมูลนักเรียน</p>
+            <p id="res-student-info" class="text-[11px] text-blue-200 opacity-90 mb-0.5 font-medium">ข้อมูลนักเรียน</p>
             <h2 id="res-name" class="text-xl font-bold tracking-wide">-</h2>
           </div>
-          <div id="res-class" class="bg-white/15 px-3 py-1.5 rounded-full text-xs font-medium backdrop-blur-md shadow-sm shrink-0 border border-white/10">
-            -
-          </div>
+          <div id="res-class" class="bg-white/15 px-3 py-1.5 rounded-full text-xs font-medium backdrop-blur-md shadow-sm shrink-0 border border-white/10">-</div>
         </div>
         <div class="bg-white/10 border border-white/10 rounded-2xl p-4 flex justify-between items-center backdrop-blur-md shadow-inner">
           <div>
@@ -192,35 +153,26 @@
           </div>
         </div>
       </div>
-      <div id="exam-container" class="card-hover"></div>
+      
+      <div id="exam-container" class="space-y-3"></div>
       <div id="homework-list" class="grid grid-cols-2 gap-3 mt-2"></div>
     </div>
   </main>
 
-  <div id="toast" class="fixed top-12 left-1/2 -translate-x-1/2 bg-gray-900/95 backdrop-blur-sm text-white px-6 py-3.5 rounded-2xl shadow-2xl hidden text-sm font-medium z-50 text-center max-w-[90%] w-max transition-all duration-300 border border-gray-800" style="will-change: transform, opacity; transform: translate(-50%, 0) translateZ(0);"></div>
+  <div id="toast" class="fixed top-12 left-1/2 -translate-x-1/2 bg-gray-900/95 backdrop-blur-sm text-white px-6 py-3.5 rounded-2xl shadow-2xl hidden text-sm font-medium z-50 text-center max-w-[90%] w-max transition-all duration-300 border border-gray-800"></div>
 
   <script>
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbygfNucbEhVTfRP5zuYW05sw3M4-L_RvwtvJEGCyPsVBTKq3tFGZg71p-W0rwrpD9uikA/exec';
+    // =========================================
+    // ⚙️ URL ของ Web App (อย่าลืมเปลี่ยนให้ตรงกับตัวล่าสุด)
+    // =========================================
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyr6H7T0DD7-cHOhlSJhw8WM2aJz3Aofmm7j-9C-4k8qv64KHMNKTTsBCLlwHXkOssTGA/exec';
+    
     let allStudents = [];
     let allAssignments = [];
 
-    // ⚡ เพิ่ม SafeStorage เพื่อป้องกันแอปพลิเคชันอย่าง LINE/Facebook บน Android บล็อก LocalStorage จนหน้าเว็บขาว
     const SafeStorage = {
-      get: function(key) {
-        try { return localStorage.getItem(key); } catch (e) { return null; }
-      },
-      set: function(key, value) {
-        try { localStorage.setItem(key, value); } catch (e) { console.warn("Storage blocked"); }
-      }
-    };
-    
-    const SafeSessionStorage = {
-      get: function(key) {
-        try { return sessionStorage.getItem(key); } catch (e) { return null; }
-      },
-      set: function(key, value) {
-        try { sessionStorage.setItem(key, value); } catch (e) { console.warn("Session Storage blocked"); }
-      }
+      get: function(key) { try { return localStorage.getItem(key); } catch (e) { return null; } },
+      set: function(key, value) { try { localStorage.setItem(key, value); } catch (e) { console.warn("Storage blocked"); } }
     };
 
     function renderInitialDropdowns(data) {
@@ -229,7 +181,6 @@
       
       const classrooms = [...new Set(allStudents.map(s => s.classroom))].sort();
       const classSelect = document.getElementById('select-classroom');
-      
       const currentSelection = classSelect.value;
       
       classSelect.innerHTML = '<option value="">-- เลือกห้องเรียน --</option>';
@@ -274,9 +225,7 @@
           renderInitialDropdowns(data);
           hideSkeletonLoader();
           hasCache = true;
-        } catch (e) {
-          console.error("การถอดรหัสแคชผิดพลาด:", e);
-        }
+        } catch (e) {}
       }
 
       try {
@@ -291,16 +240,13 @@
         } else {
           allStudents = data.filter(d => d.type === 'student');
           allAssignments = data.filter(d => d.type === 'assignment');
-          
           const classSelect = document.getElementById('select-classroom');
-          if (!classSelect.value) {
-            renderInitialDropdowns(data);
-          }
+          if (!classSelect.value) renderInitialDropdowns(data);
         }
       } catch (e) {
         if (!hasCache) {
           showToast('❌ เกิดข้อผิดพลาดในการเตรียมข้อมูล');
-          document.getElementById('loading-skeleton').innerHTML = '<div class="h-full flex items-center justify-center"><p class="text-xs text-red-500 font-medium">โหลดข้อมูลไม่สำเร็จ กรุณารีเฟรชหน้าเว็บ</p></div>';
+          document.getElementById('loading-skeleton').innerHTML = '<div class="h-full flex items-center justify-center"><p class="text-xs text-red-500 font-medium">โหลดข้อมูลไม่สำเร็จ</p></div>';
         }
       }
     };
@@ -327,8 +273,101 @@
       studentSelect.disabled = false;
     }
 
-    function goBack() {
-      window.location.href = 'index.html';
+    function goBack() { window.location.href = 'index.html'; }
+
+    // ฟังก์ชันสร้าง UI การ์ดคะแนนสอบปกติ
+    function generateExamCardHTML(title, scoreRaw, badgeText, delayMs) {
+      let parsedScore = parseFloat(scoreRaw);
+      let defaultTitle = title || 'การทดสอบวัดผล';
+      
+      if (!isNaN(parsedScore)) {
+        let formattedScore = parsedScore.toFixed(1).replace('.0', '');
+        if (parsedScore < 6) {
+          return `
+            <div class="card-hover bg-[#FFF4F4] border border-[#FFE0E0] p-5 rounded-[1.5rem] shadow-sm flex justify-between items-center relative overflow-hidden fade-in-up" style="animation-delay: ${delayMs}ms;">
+              <div class="absolute top-0 left-0 w-1.5 h-full bg-red-500"></div>
+              <div class="pr-3 z-10 max-w-[70%]">
+                <span class="text-red-600 text-[10px] font-bold uppercase tracking-wide bg-white px-2.5 py-1 rounded shadow-sm border border-red-100">🚨 สอบไม่ผ่าน</span>
+                <h3 class="font-bold text-gray-900 text-[15px] mt-2.5 leading-tight line-clamp-2">${defaultTitle}</h3>
+                <p class="text-[11px] text-red-600 font-medium mt-1.5 leading-relaxed">โปรดดำเนินการส่งงานแก้ให้เรียบร้อย</p>
+              </div>
+              <div class="flex flex-col items-center shrink-0 z-10">
+                <span class="text-[10px] text-red-400 font-medium mb-1">คะแนนที่ได้</span>
+                <div class="bg-red-500 text-white min-w-[3.5rem] h-12 px-3 flex items-center justify-center rounded-xl font-bold text-2xl shadow-md border border-red-600/20">${formattedScore}</div>
+              </div>
+            </div>
+          `;
+        } else {
+          return `
+            <div class="card-hover bg-gradient-to-r from-[#293B86] to-[#364b9e] text-white p-5 rounded-[1.5rem] shadow-md flex justify-between items-center relative overflow-hidden fade-in-up" style="animation-delay: ${delayMs}ms;">
+              <div class="absolute -right-6 -top-6 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+              <div class="pr-3 z-10 max-w-[70%]">
+                <span class="text-[#293B86] text-[10px] font-bold uppercase tracking-wide bg-white/95 px-2.5 py-1 rounded shadow-sm backdrop-blur-sm">🏆 ${badgeText}</span>
+                <h3 class="font-bold text-white text-[15px] mt-2.5 leading-tight drop-shadow-sm line-clamp-2">${defaultTitle}</h3>
+                <p class="text-[11px] text-blue-200 font-medium mt-1.5">✅ ผ่านเกณฑ์เรียบร้อย</p>
+              </div>
+              <div class="flex flex-col items-center shrink-0 z-10">
+                <span class="text-[10px] text-blue-200 font-medium mb-1">คะแนนที่ได้</span>
+                <div class="bg-white text-[#293B86] min-w-[3.5rem] h-12 px-3 flex items-center justify-center rounded-xl font-bold text-2xl shadow-md border border-white/50">${formattedScore}</div>
+              </div>
+            </div>
+          `;
+        }
+      } else {
+        return `
+          <div class="card-hover bg-white border border-gray-100 p-5 rounded-[1.5rem] shadow-sm flex justify-between items-center fade-in-up" style="animation-delay: ${delayMs}ms;">
+            <div class="pr-3 z-10 max-w-[70%]">
+              <span class="bg-gray-50 text-gray-500 border border-gray-100 text-[10px] px-2.5 py-1 rounded font-bold uppercase tracking-wide shadow-sm">📌 ${badgeText}</span>
+              <h3 class="font-bold text-gray-900 text-[15px] mt-2.5 leading-tight line-clamp-2">${defaultTitle}</h3>
+            </div>
+            <div class="flex flex-col items-center shrink-0">
+              <span class="text-[10px] text-gray-400 font-medium mb-1">สถานะ</span>
+              <div class="bg-gray-50 text-gray-500 border border-gray-200 px-3 h-11 flex items-center justify-center rounded-xl font-bold text-sm shadow-sm whitespace-nowrap">${scoreRaw || 'รอตรวจ'}</div>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // ⚡ ฟังก์ชันสำหรับสอบกลางภาค (ดีไซน์สีกรมที่เข้มมากๆ เป็นพิเศษเสมอ)
+    function generateMidtermCardHTML(title, scoreRaw, delayMs) {
+      let defaultTitle = title || 'คะแนนสอบกลางภาค';
+      let parsedScore = parseFloat(scoreRaw);
+      let bgStyle = "bg-gradient-to-r from-[#0B132B] to-[#1C2541]"; // สีกรมท่าเข้มมาก
+      
+      if (!isNaN(parsedScore)) {
+        let formattedScore = parsedScore.toFixed(1).replace('.0', '');
+        return `
+          <div class="card-hover ${bgStyle} text-white p-5 rounded-[1.5rem] shadow-lg flex justify-between items-center relative overflow-hidden fade-in-up" style="animation-delay: ${delayMs}ms;">
+            <div class="absolute -right-6 -top-6 w-32 h-32 bg-white/5 rounded-full blur-2xl"></div>
+            <div class="pr-3 z-10 max-w-[70%]">
+              <span class="text-[#0B132B] text-[10px] font-bold uppercase tracking-wide bg-[#E2E8F0] px-2.5 py-1 rounded shadow-sm backdrop-blur-sm">🎯 สอบกลางภาค</span>
+              <h3 class="font-bold text-white text-[15px] mt-2.5 leading-tight drop-shadow-sm line-clamp-2">${defaultTitle}</h3>
+              <p class="text-[11px] text-gray-400 font-medium mt-1.5">ผลการทดสอบกลางภาคเรียน</p>
+            </div>
+            <div class="flex flex-col items-center shrink-0 z-10">
+              <span class="text-[10px] text-gray-400 font-medium mb-1">คะแนนที่ได้</span>
+              <div class="bg-white text-[#0B132B] min-w-[3.5rem] h-12 px-3 flex items-center justify-center rounded-xl font-bold text-2xl shadow-md border border-gray-200/50">${formattedScore}</div>
+            </div>
+          </div>
+        `;
+      } else {
+        let displayText = scoreRaw || 'รอตรวจ';
+        return `
+          <div class="card-hover ${bgStyle} text-white p-5 rounded-[1.5rem] shadow-lg flex justify-between items-center relative overflow-hidden fade-in-up" style="animation-delay: ${delayMs}ms;">
+            <div class="absolute -right-6 -top-6 w-32 h-32 bg-white/5 rounded-full blur-2xl"></div>
+            <div class="pr-3 z-10 max-w-[70%]">
+              <span class="text-[#0B132B] text-[10px] font-bold uppercase tracking-wide bg-[#E2E8F0] px-2.5 py-1 rounded shadow-sm backdrop-blur-sm">📌 สอบกลางภาค</span>
+              <h3 class="font-bold text-white text-[15px] mt-2.5 leading-tight drop-shadow-sm line-clamp-2">${defaultTitle}</h3>
+              <p class="text-[11px] text-gray-400 font-medium mt-1.5">ผลการทดสอบกลางภาคเรียน</p>
+            </div>
+            <div class="flex flex-col items-center shrink-0 z-10">
+              <span class="text-[10px] text-gray-400 font-medium mb-1">สถานะ</span>
+              <div class="bg-white/10 text-white min-w-[3.5rem] h-11 px-3 flex items-center justify-center rounded-xl font-bold text-sm shadow-inner border border-white/20 whitespace-nowrap">${displayText}</div>
+            </div>
+          </div>
+        `;
+      }
     }
 
     async function checkScores() {
@@ -349,32 +388,18 @@
         </span>
       `;
 
-      await new Promise(resolve => setTimeout(resolve, 30));
-
       try {
-        const cacheKey = `score_${student.classroom}_${student.number}`;
-        const cachedSession = SafeSessionStorage.get(cacheKey);
-        let result = null;
-        
-        if(cachedSession) {
-          const parsedCache = JSON.parse(cachedSession);
-          if(Date.now() - parsedCache.time < 600000) {
-            result = parsedCache.data;
-          }
-        }
-
-        if(!result) {
-          const url = `${SCRIPT_URL}?action=checkStatus&classroom=${encodeURIComponent(student.classroom)}&name=${encodeURIComponent(student.name)}&number=${encodeURIComponent(student.number)}`;
-          const res = await fetch(url);
-          result = await res.json();
-          if(result.isOk) {
-            SafeSessionStorage.set(cacheKey, JSON.stringify({ time: Date.now(), data: result }));
-          }
-        }
+        // ⚡ ดึงข้อมูลใหม่เสมอ (เอาโค้ดแคชออกแล้ว เพื่อลดปัญหาการแสดงผลช้า)
+        const url = `${SCRIPT_URL}?action=checkStatus&classroom=${encodeURIComponent(student.classroom)}&name=${encodeURIComponent(student.name)}&number=${encodeURIComponent(student.number)}`;
+        const res = await fetch(url);
+        let result = await res.json();
 
         if(result.isOk) {
           document.getElementById('res-name').innerText = student.name;
           document.getElementById('res-class').innerText = `เลขที่ ${student.number} | ${student.classroom}`;
+          
+          let studentIdText = result.studentId && result.studentId !== "ไม่พบรหัส" ? ` (รหัสประจำตัว: ${result.studentId})` : "";
+          document.getElementById('res-student-info').innerText = `ข้อมูลนักเรียน${studentIdText}`;
 
           let computedTotalScore = 0;
           if(result.data && Array.isArray(result.data)) {
@@ -386,64 +411,20 @@
           }
           document.getElementById('res-hw-score').innerText = computedTotalScore;
 
+          // แสดงการ์ดสอบทั้ง 3 ใบเรียงต่อกัน
           const examContainer = document.getElementById('exam-container');
-          let examScoreRaw = result.examScore;
-          let parsedExamScore = parseFloat(examScoreRaw);
-          
-          if (!isNaN(parsedExamScore)) {
-            let formattedScore = parsedExamScore.toFixed(1);
-            if (parsedExamScore < 6) {
-              examContainer.innerHTML = `
-                <div class="bg-[#FFF4F4] border border-[#FFE0E0] p-5 rounded-[1.5rem] shadow-sm flex justify-between items-center relative overflow-hidden fade-in-up" style="animation-delay: 50ms;">
-                  <div class="absolute top-0 left-0 w-1.5 h-full bg-red-500"></div>
-                  <div class="pr-3 z-10 max-w-[70%]">
-                    <span class="text-red-600 text-[10px] font-bold uppercase tracking-wide bg-white px-2.5 py-1 rounded shadow-sm border border-red-100">🚨 สอบไม่ผ่าน</span>
-                    <h3 class="font-bold text-gray-900 text-[15px] mt-2.5 leading-tight">${result.examTitle || 'การทดสอบวัดผล'}</h3>
-                    <p class="text-[11px] text-red-600 font-medium mt-1.5 leading-relaxed">โปรดดำเนินการส่งงานแก้ให้เรียบร้อย</p>
-                  </div>
-                  <div class="flex flex-col items-center shrink-0 z-10">
-                    <span class="text-[10px] text-red-400 font-medium mb-1">คะแนนที่ได้</span>
-                    <div class="bg-red-500 text-white min-w-[3.5rem] h-12 px-3 flex items-center justify-center rounded-xl font-bold text-2xl shadow-md border border-red-600/20">${formattedScore}</div>
-                  </div>
-                </div>
-              `;
-            } else {
-              examContainer.innerHTML = `
-                <div class="bg-gradient-to-r from-[#293B86] to-[#364b9e] text-white p-5 rounded-[1.5rem] shadow-md flex justify-between items-center relative overflow-hidden fade-in-up" style="animation-delay: 50ms;">
-                  <div class="absolute -right-6 -top-6 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
-                  <div class="pr-3 z-10 max-w-[70%]">
-                    <span class="text-[#293B86] text-[10px] font-bold uppercase tracking-wide bg-white/95 px-2.5 py-1 rounded shadow-sm backdrop-blur-sm">🏆 คะแนนสอบล่าสุด</span>
-                    <h3 class="font-bold text-white text-[15px] mt-2.5 leading-tight drop-shadow-sm">${result.examTitle || 'การทดสอบวัดผล'}</h3>
-                    <p class="text-[11px] text-blue-200 font-medium mt-1.5">✅ ผ่านเกณฑ์เรียบร้อย</p>
-                  </div>
-                  <div class="flex flex-col items-center shrink-0 z-10">
-                    <span class="text-[10px] text-blue-200 font-medium mb-1">คะแนนที่ได้</span>
-                    <div class="bg-white text-[#293B86] min-w-[3.5rem] h-12 px-3 flex items-center justify-center rounded-xl font-bold text-2xl shadow-md border border-white/50">${formattedScore}</div>
-                  </div>
-                </div>
-              `;
-            }
-          } else {
-            examContainer.innerHTML = `
-                <div class="bg-white border border-gray-100 p-5 rounded-[1.5rem] shadow-sm flex justify-between items-center fade-in-up" style="animation-delay: 50ms;">
-                  <div class="pr-3 z-10 max-w-[70%]">
-                    <span class="bg-gray-50 text-gray-500 border border-gray-100 text-[10px] px-2.5 py-1 rounded font-bold uppercase tracking-wide shadow-sm">📌 คะแนนสอบล่าสุด</span>
-                    <h3 class="font-bold text-gray-900 text-[15px] mt-2.5 leading-tight">${result.examTitle || 'การทดสอบ'}</h3>
-                  </div>
-                  <div class="flex flex-col items-center shrink-0">
-                    <span class="text-[10px] text-gray-400 font-medium mb-1">สถานะ</span>
-                    <div class="bg-gray-50 text-gray-500 border border-gray-200 px-3 h-11 flex items-center justify-center rounded-xl font-bold text-sm shadow-sm">${examScoreRaw || 'รอตรวจ'}</div>
-                  </div>
-                </div>
-            `;
-          }
+          examContainer.innerHTML = 
+            generateExamCardHTML(result.exam1Title, result.exam1Score, 'คะแนนสอบ (1)', 50) +
+            generateExamCardHTML(result.exam2Title, result.exam2Score, 'คะแนนสอบล่าสุด', 100) +
+            generateMidtermCardHTML('คะแนนสอบกลางภาค', result.midtermScore, 150);
 
+          // แสดงรายการชิ้นงาน
           const hwContainer = document.getElementById('homework-list');
           const classAssignments = allAssignments.filter(a => a.classroom === student.classroom);
 
           if(classAssignments.length === 0) {
             hwContainer.className = "block mt-2 fade-in-up";
-            hwContainer.style.animationDelay = "100ms";
+            hwContainer.style.animationDelay = "200ms";
             hwContainer.innerHTML = `<div class="bg-white p-6 rounded-[1.5rem] shadow-sm border border-gray-50 text-center text-[13px] text-gray-400">ยังไม่มีการมอบหมายชิ้นงานในระบบ</div>`;
           } else {
             hwContainer.className = "grid grid-cols-2 gap-3 mt-2";
@@ -489,7 +470,7 @@
               }
               
               return `
-                <div class="card-hover bg-white p-4 rounded-[1.25rem] shadow-sm border border-gray-50 flex flex-col relative h-full fade-in-up" style="animation-delay: ${100 + (index * 40)}ms;">
+                <div class="card-hover bg-white p-4 rounded-[1.25rem] shadow-sm border border-gray-50 flex flex-col relative h-full fade-in-up" style="animation-delay: ${200 + (index * 40)}ms;">
                   <div class="mb-3">
                     <h4 class="font-semibold text-gray-800 text-[13px] leading-relaxed mb-2 line-clamp-2">${h.assignmentName}</h4>
                     <div class="flex items-center gap-1.5 text-[11px] font-medium ${statusColor}">

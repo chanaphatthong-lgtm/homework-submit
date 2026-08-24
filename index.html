@@ -208,7 +208,7 @@
   <div id="toast" class="fixed top-12 left-1/2 -translate-x-1/2 bg-gray-900/95 backdrop-blur-sm text-white px-5 py-3 rounded-2xl shadow-2xl hidden text-xs font-medium z-50 text-center max-w-[90%] w-max transition-all duration-300 border border-gray-800" style="will-change: transform, opacity; transform: translate(-50%, 0) translateZ(0);"></div>
 
   <script>
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyr6H7T0DD7-cHOhlSJhw8WM2aJz3Aofmm7j-9C-4k8qv64KHMNKTTsBCLlwHXkOssTGA/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx47pNpAOEXiuKGQnYARQCL1WPCtcL8EZyBd5LtCPPLZRQF91hLkNe4Jldv_QfE2FU_5g/exec';
     
     let allStudents = [];
     let allAssignments = []; 
@@ -342,12 +342,12 @@
       // หานักเรียนจากอาเรย์ allStudents
       const stdData = allStudents.find(s => s.name === studentName);
       
-      // ตรวจสอบว่ามีข้อมูลคะแนนถูกส่งมาหรือไม่ (ต้องเพิ่มฝั่ง Apps script ให้มีคีย์ j1Score)
+      // ตรวจสอบว่ามีข้อมูลคะแนนถูกส่งมาหรือไม่
       if (stdData && stdData.j1Score !== undefined && stdData.j1Score !== '' && stdData.j1Score !== null) {
         const score = parseFloat(stdData.j1Score);
         scoreValue.innerText = isNaN(score) ? stdData.j1Score : score.toFixed(1);
         
-        // กำหนดเกณฑ์ผ่าน (สมมติว่า >= 5 คือผ่าน สามารถแก้ตัวเลข 5 ได้ตามต้องการ)
+        // กำหนดเกณฑ์ผ่าน (>= 5 คือผ่าน)
         if (!isNaN(score) && score >= 5) {
           scoreStatus.innerHTML = `<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg> <span>ผ่านเกณฑ์เรียบร้อย</span>`;
           scoreStatus.className = "text-green-300 text-xs mt-1.5 flex items-center gap-1 font-medium";
@@ -356,14 +356,14 @@
           scoreStatus.className = "text-amber-300 text-xs mt-1.5 flex items-center gap-1 font-medium";
         }
 
-        // แสดงกล่องคะแนน (เพิ่มแอนิเมชันให้ดูสมูท)
+        // แสดงกล่องคะแนน
         scoreCard.classList.remove('hidden');
         setTimeout(() => {
           scoreCard.classList.remove('opacity-0', 'translate-y-4');
         }, 50);
 
       } else {
-        // หากไม่มีคะแนน ก็ให้ซ่อนกล่องไว้
+        // หากไม่มีคะแนน ให้ซ่อนกล่องไว้
         scoreCard.classList.add('opacity-0', 'translate-y-4');
         setTimeout(() => scoreCard.classList.add('hidden'), 300);
       }
@@ -400,6 +400,7 @@
       }, 3500); 
     }
 
+    // 🌟 ฟังก์ชันบีบอัดรูปภาพ (ปรับปรุงใหม่: ชัดขึ้น + รองรับมือถือรุ่นเก่า) 🌟
     function compressImage(file) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -411,16 +412,23 @@
             const canvas = document.createElement('canvas');
             let width = img.width;
             let height = img.height;
-            const MAX_WIDTH = 600; 
+            
+            // ขยายความกว้างสูงสุดเป็น 1200px เพื่อให้อ่านตัวหนังสือออกชัดเจน
+            const MAX_WIDTH = 1200; 
             if (width > MAX_WIDTH) {
               height *= MAX_WIDTH / width;
               width = MAX_WIDTH;
             }
+            
             canvas.width = width;
             canvas.height = height;
-            const ctx = canvas.getContext('2d', { willReadFrequently: true });
+            
+            // ตัด { willReadFrequently: true } ออก ป้องกันมือถือบางรุ่น Error
+            const ctx = canvas.getContext('2d'); 
             ctx.drawImage(img, 0, 0, width, height);
-            const dataUrl = canvas.toDataURL('image/jpeg', 0.5); 
+            
+            // เพิ่มคุณภาพความชัดขึ้นเป็น 0.8 (80%)
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.8); 
             resolve(dataUrl);
           };
           img.onerror = function() {
@@ -478,8 +486,13 @@
           }
         };
 
+        // 🌟 ปรับปรุงคำสั่ง fetch ให้รองรับระบบความปลอดภัยของมือถือทุกรุ่น 🌟
         await fetch(SCRIPT_URL, {
           method: 'POST',
+          redirect: 'follow',
+          headers: {
+            'Content-Type': 'text/plain;charset=utf-8'
+          },
           body: JSON.stringify(payload)
         });
 
@@ -491,7 +504,7 @@
         document.getElementById('assignment').innerHTML = '<option value="">-- เลือกห้องก่อน --</option>';
         document.getElementById('assignment').disabled = true;
 
-        // ซ่อนคะแนนสอบทันทีที่ส่งเสร็จ (ฟอร์มถูกรีเซ็ต)
+        // ซ่อนคะแนนสอบทันทีที่ส่งเสร็จ
         document.getElementById('exam-score-card').classList.add('hidden', 'opacity-0', 'translate-y-4');
 
         fileStatus.innerText = "เลือกจากคลัง"; cameraStatus.innerText = "ถ่ายรูป";

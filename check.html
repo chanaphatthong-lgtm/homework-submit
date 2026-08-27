@@ -417,16 +417,16 @@
 
           examContainer.innerHTML = 
             // 1. อันบนสุด คะแนนสอบบทที่ 1
-            generateExamCardHTML(result.exam1Title, result.exam1Score, 'บทที่ 1', 50) +
+            generateExamCardHTML(result.exam1Title, result.exam1Score, 'บทที่ 1', 40) +
             
             // 2. ต่อมา คะแนนสอบบทที่ 2 และ 3 (รวมช่องเดียวกัน โดยใช้ข้อมูลจาก exam2)
-            generateExamCardHTML(title2and3, result.exam2Score, 'บทที่ 2 และ 3', 90) +
+            generateExamCardHTML(title2and3, result.exam2Score, 'บทที่ 2 และ 3', 70) +
             
             // 3. ต่อมา คะแนนสอบกลางภาค
-            generateMidtermCardHTML('คะแนนสอบกลางภาค', result.midtermScore, 130) +
+            generateMidtermCardHTML('คะแนนสอบกลางภาค', result.midtermScore, 100) +
             
             // 4. ต่อมา คะแนนสอบบทที่ 4 (ดึงจาก exam4 ที่เพิ่งทำเพิ่มไป)
-            generateExamCardHTML(result.exam4Title, result.exam4Score, 'บทที่ 4', 170);
+            generateExamCardHTML(result.exam4Title, result.exam4Score, 'บทที่ 4', 130);
 
           const hwContainer = document.getElementById('homework-list');
           const classAssignments = allAssignments.filter(a => a.classroom === student.classroom);
@@ -449,47 +449,93 @@
               };
             });
 
+            // ==========================================
+            // อัปเดตส่วน HTML สร้างการ์ดชิ้นงานแบบใหม่ตรงนี้
+            // ==========================================
+            // ฟังก์ชันช่วยแปลงวันที่และเวลาให้เป็น "ดด ม.ค. ปี 2 หลัก" เสมอ
+            const formatThaiDate = (dateStr) => {
+              if (!dateStr || dateStr === '-') return '';
+              
+              let datePart = dateStr.toString().split(' ')[0];
+              
+              if (datePart.includes('/')) {
+                let parts = datePart.split('/');
+                if (parts.length === 3) {
+                  let d = parseInt(parts[0], 10);
+                  let m = parseInt(parts[1], 10);
+                  let y = parseInt(parts[2], 10);
+                  
+                  if (m > 12 && d <= 12) { let temp = d; d = m; m = temp; }
+                  
+                  if (y < 100) {
+                    if (y < 50) y = y + 2000 + 543;
+                    else y = y + 2500;
+                  } else if (y < 2500) { 
+                    y += 543;
+                  }
+                  
+                  let shortYear = y.toString().slice(-2);
+                  const thaiMonths = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+                  if (m >= 1 && m <= 12 && d >= 1 && d <= 31) {
+                    return `${d} ${thaiMonths[m - 1]} ${shortYear}`;
+                  }
+                }
+              }
+              
+              let dObj = new Date(dateStr);
+              if (!isNaN(dObj.getTime())) {
+                return dObj.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' });
+              }
+              
+              return datePart;
+            };
+
             hwContainer.innerHTML = fullReportData.map((h, index) => {
               let statusText, statusColor, scoreBox, dotColor;
+              let displayDate = formatThaiDate(h.submittedDate);
               
               if (h.isSubmitted) {
-                let displayDate = (h.submittedDate && h.submittedDate !== '-') ? h.submittedDate.split(' ')[0] : '';
-                
                 if (h.isLate) {
                   statusText = displayDate ? `ส่งช้า (${displayDate})` : 'ส่งช้า';
-                  statusColor = "text-amber-500 font-semibold";
-                  dotColor = "bg-amber-500 shadow-amber-500/30";
+                  statusColor = "text-[#F59E0B]";
+                  dotColor = "bg-[#F59E0B]";
                 } else {
                   statusText = displayDate ? `ส่งแล้ว (${displayDate})` : 'ส่งแล้ว';
-                  statusColor = "text-emerald-600";
-                  dotColor = "bg-emerald-500 shadow-emerald-500/30";
+                  statusColor = "text-[#10B981]";
+                  dotColor = "bg-[#10B981]";
                 }
                 
                 if (h.score !== null && h.score !== '' && h.score !== '-') {
                   let cleanScore = !isNaN(parseFloat(h.score)) ? parseFloat(h.score).toFixed(1).replace('.0', '') : h.score;
-                  scoreBox = `<div class="bg-gradient-to-tr from-[#293B86] to-[#3a4ea8] text-white min-w-[3.5rem] h-10 px-3 flex items-center justify-center rounded-xl font-bold text-[20px] shadow-sm border border-[#293B86]/20">${cleanScore}</div>`;
+                  scoreBox = `<div class="bg-[#34499E] text-white min-w-[3.2rem] px-2.5 h-[2.1rem] flex items-center justify-center rounded-xl font-bold text-[18px] shadow-sm">${cleanScore}</div>`;
                 } else {
-                  scoreBox = `<div class="bg-[#4267B2] text-white min-w-[3.5rem] h-10 px-3 flex items-center justify-center rounded-xl font-bold text-[13px] shadow-sm">รอตรวจ</div>`;
+                  scoreBox = `<div class="bg-gray-100 text-gray-500 min-w-[3.2rem] px-2.5 h-[2.1rem] flex items-center justify-center rounded-xl font-bold text-[12px] shadow-sm">รอตรวจ</div>`;
                 }
               } else {
                 statusText = `ไม่ได้ส่ง`;
                 statusColor = "text-rose-500";
-                dotColor = "bg-rose-500 shadow-rose-500/30";
-                scoreBox = `<div class="bg-gray-50 border border-gray-100 text-gray-400 min-w-[3.5rem] h-10 px-3 flex items-center justify-center rounded-xl font-bold text-[20px] shadow-inner">-</div>`;
+                dotColor = "bg-rose-500";
+                scoreBox = `<div class="bg-gray-50 border border-gray-100 text-gray-400 min-w-[3.2rem] px-2.5 h-[2.1rem] flex items-center justify-center rounded-xl font-bold text-[18px] shadow-inner">-</div>`;
               }
               
               return `
-                <div class="card-hover bg-white p-4 rounded-[1.25rem] shadow-sm border border-gray-50 flex flex-col relative h-full fade-in-up" style="animation-delay: ${250 + (index * 40)}ms;">
-                  <div class="mb-3">
-                    <h4 class="font-semibold text-gray-800 text-[13px] leading-relaxed mb-2 line-clamp-2">${h.assignmentName}</h4>
-                    <div class="flex items-center gap-1.5 text-[11px] font-medium ${statusColor}">
-                      <span class="w-2 h-2 rounded-full shrink-0 shadow-sm ${dotColor}"></span>
+                <div class="card-hover bg-white px-3.5 py-3 rounded-[1.1rem] shadow-sm border border-gray-50 flex flex-col justify-between relative fade-in-up" style="animation-delay: ${250 + (index * 40)}ms;">
+                  <!-- ชื่อชิ้นงาน -->
+                  <h4 class="font-semibold text-gray-800 text-[13.5px] leading-snug mb-1 line-clamp-2">${h.assignmentName}</h4>
+                  
+                  <!-- ส่วนล่าง: สถานะวันที่ และ คะแนน -->
+                  <div class="flex justify-between items-end pt-1 mt-1">
+                    <!-- สถานะและวันที่ส่ง -->
+                    <div class="flex items-center gap-1.5 text-[11.5px] font-medium ${statusColor} pb-0.5">
+                      <span class="w-2 h-2 rounded-full shrink-0 ${dotColor}"></span>
                       <span class="truncate">${statusText}</span>
                     </div>
-                  </div>
-                  <div class="mt-auto flex flex-col items-end pt-1">
-                    <span class="text-[10px] text-gray-400 font-medium mb-1">คะแนน</span>
-                    ${scoreBox}
+                    
+                    <!-- คะแนน -->
+                    <div class="flex flex-col items-end shrink-0">
+                      <span class="text-[10px] text-gray-400 font-semibold mb-0.5 mr-0.5">คะแนน</span>
+                      ${scoreBox}
+                    </div>
                   </div>
                 </div>
               `;

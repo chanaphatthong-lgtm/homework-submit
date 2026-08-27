@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <title>โซนเล่นเกม - ครูเกมส์</title>
+  
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fredoka:wght@600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+    html, body { font-family: 'DM Sans', sans-serif; max-width: 100vw; overflow-x: hidden; margin: 0; min-height: 100vh; touch-action: manipulation; }
+    
+    /* 🌸 พื้นหลังสมูท 60FPS */
+    body { background: linear-gradient(-45deg, #fce7f3, #fdf2f8, #ffe4e6, #fff1f2); background-size: 400% 400%; animation: gradientBG 12s ease infinite; }
+    @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+    
+    .btn-tactile { transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    .btn-tactile:hover:not(:disabled) { transform: scale(1.05); filter: brightness(1.03); }
+    .btn-tactile:active:not(:disabled) { transform: scale(0.95) translateY(2px); }
+    .btn-disabled { opacity: 0.6; cursor: not-allowed; filter: grayscale(100%); }
+    
+    .game-card { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(236, 72, 153, 0.10); border: 1px solid rgba(255, 255, 255, 0.8); }
+    .font-cute { font-family: 'Fredoka', sans-serif; }
+
+    /* 💥 แอนิเมชันตัวเลขเด้ง */
+    @keyframes scorePunch { 0% { transform: scale(1); } 40% { transform: scale(1.25) rotate(2deg); } 100% { transform: scale(1) rotate(0deg); } }
+    .score-bounce { animation: scorePunch 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+    /* ✨ แอนิเมชันอิโมจิลอย */
+    @keyframes floatEmojiAnim { 0% { opacity: 0; transform: translateY(0) scale(0.3) rotate(-10deg); } 20% { opacity: 1; transform: translateY(-40px) scale(1.2) rotate(10deg); } 100% { opacity: 0; transform: translateY(-130px) scale(0.9) rotate(25deg); } }
+    .floating-emoji { position: absolute; animation: floatEmojiAnim 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; font-size: 2.8rem; pointer-events: none; user-select: none; z-index: 50; will-change: transform, opacity; }
+
+    /* 💧 แอนิเมชันคลื่นน้ำเวลากด */
+    @keyframes rippleAnim { 0% { transform: scale(0); opacity: 0.6; } 100% { transform: scale(4); opacity: 0; } }
+    .ripple { position: absolute; border-radius: 50%; background: radial-gradient(circle, rgba(236,72,153,0.3) 0%, rgba(236,72,153,0) 70%); width: 80px; height: 80px; margin-top: -40px; margin-left: -40px; animation: rippleAnim 0.5s ease-out forwards; pointer-events: none; z-index: 40; will-change: transform, opacity; }
+
+    /* ❤️ แอนิเมชันหัวใจ */
+    @keyframes heartDecrease {
+      0% { transform: scale(1.4); opacity: 1; filter: grayscale(0%); }
+      50% { transform: scale(0.5) rotate(-15deg); opacity: 0.4; }
+      100% { transform: scale(0.9) rotate(0deg); opacity: 0.25; filter: grayscale(100%); }
+    }
+    .heart-decrease-anim { animation: heartDecrease 0.5s ease-out forwards; }
+
+    @keyframes heartIncrease {
+      0% { transform: scale(0.7); opacity: 0.25; filter: grayscale(100%); }
+      50% { transform: scale(1.5) rotate(15deg); opacity: 1; filter: grayscale(0%) drop-shadow(0 0 6px rgba(236,72,153,0.8)); }
+      100% { transform: scale(1) rotate(0deg); opacity: 1; filter: grayscale(0%); }
+    }
+    .heart-increase-anim { animation: heartIncrease 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+  </style>
+</head>
+<body class="text-gray-800 flex flex-col items-center">
+
+  <nav class="w-full pt-6 px-5 max-w-2xl mx-auto flex items-center justify-between relative z-20">
+    <button onclick="goBack()" class="btn-tactile flex items-center justify-center w-10 h-10 bg-white rounded-full shadow-sm border border-pink-100 text-pink-500 hover:bg-pink-50 transition-colors">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
+    </button>
+    
+    <!-- กล่องแสดงหัวใจ 5 ดวงเรียงกัน -->
+    <div class="bg-white/90 backdrop-blur-sm border border-pink-100 px-3 py-1.5 rounded-full shadow-sm flex items-center gap-2 transition-all">
+      <div id="hearts-container" class="flex items-center gap-1 text-sm md:text-base"></div>
+      <span id="heart-timer" class="text-[11px] text-pink-500 font-bold bg-pink-50 px-2 py-0.5 rounded-full hidden">05:00</span>
+    </div>
+  </nav>
+
+  <header class="pb-4 pt-2 px-5 w-full max-w-2xl text-center relative z-10">
+    <div class="inline-block bg-white/80 backdrop-blur-sm px-6 py-3 rounded-2xl shadow-sm border border-pink-100/50">
+      <p class="text-[11px] text-pink-500 font-semibold uppercase tracking-wider mb-1">PLAYER</p>
+      
+      <!-- ชื่อผู้เล่น + ป้ายอันดับด้านขวา -->
+      <div class="flex items-center justify-center gap-2">
+        <p id="player-name" class="text-lg font-bold text-gray-900">กำลังโหลด...</p>
+        <span id="player-rank" class="bg-gradient-to-r from-amber-400 to-orange-400 text-white text-[11px] px-2.5 py-0.5 rounded-full font-bold shadow-sm flex items-center gap-1 hidden">
+          🏆 อันดับ <span id="rank-number">-</span>
+        </span>
+      </div>
+
+      <p id="player-class" class="text-[14px] text-gray-500 font-medium mt-0.5">-</p>
+    </div>
+  </header>
+
+  <main class="w-full max-w-2xl mx-auto px-5 pb-10 flex-grow flex flex-col relative z-10">
+    <div class="game-card flex-grow rounded-[2rem] p-5 relative overflow-hidden flex flex-col items-center justify-between min-h-[460px]">
+      
+      <!-- Leaderboard (Top 3) -->
+      <div id="leaderboard-container" class="hidden w-full bg-white/70 backdrop-blur-md rounded-2xl p-3 border border-pink-100 shadow-sm relative z-20 transition-all duration-300">
+        <div class="text-center mb-2">
+          <span class="text-[11px] font-bold text-pink-500 uppercase tracking-widest">🏆 WEEKLY TOP 3</span>
+        </div>
+        <div class="flex justify-center gap-2 text-center">
+          <div id="rank-card-1" class="hidden flex-1 max-w-[110px] bg-amber-50/90 border border-amber-200/80 rounded-xl p-2 flex flex-col items-center transition-all duration-300"><span class="text-sm">🥇</span><span id="rank-name-1" class="text-[12px] font-bold text-gray-800 truncate w-full mt-0.5"></span><span id="rank-score-1" class="font-cute text-sm font-bold text-amber-600"></span></div>
+          <div id="rank-card-2" class="hidden flex-1 max-w-[110px] bg-slate-50/90 border border-slate-200/80 rounded-xl p-2 flex flex-col items-center transition-all duration-300"><span class="text-sm">🥈</span><span id="rank-name-2" class="text-[12px] font-bold text-gray-800 truncate w-full mt-0.5"></span><span id="rank-score-2" class="font-cute text-sm font-bold text-slate-600"></span></div>
+          <div id="rank-card-3" class="hidden flex-1 max-w-[110px] bg-orange-50/90 border border-orange-200/80 rounded-xl p-2 flex flex-col items-center transition-all duration-300"><span class="text-sm">🥉</span><span id="rank-name-3" class="text-[12px] font-bold text-gray-800 truncate w-full mt-0.5"></span><span id="rank-score-3" class="font-cute text-sm font-bold text-orange-600"></span></div>
+        </div>
+      </div>
+
+      <!-- Start Screen -->
+      <div id="start-screen" class="my-auto text-center w-full flex flex-col items-center justify-center transition-opacity duration-300">
+        <div class="bg-pink-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce shadow-inner">
+          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ec4899" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="12" x="2" y="6" rx="2"/><path d="M6 12h4"/><path d="M8 10v4"/><path d="M15 13h.01"/><path d="M18 11h.01"/></svg>
+        </div>
+        <h2 class="text-2xl font-bold text-gray-800 mb-1">Tap Emoji Clicker! ✨</h2>
+        <p class="text-xs text-gray-500 mb-6">คุณมีเวลา <span class="font-bold text-pink-500">30 วินาที</span> ในการไต่อันดับ!</p>
+        <button id="start-btn" onclick="startGame()" class="btn-tactile bg-gradient-to-r from-pink-400 to-pink-500 text-white font-bold text-base py-3 px-8 rounded-full shadow-lg shadow-pink-200 border border-pink-400">เริ่มเกมเลย!</button>
+        <p id="no-heart-msg" class="text-xs text-red-500 font-bold mt-3 hidden">รอหัวใจฟื้นฟูเพื่อเล่นต่อนะ!</p>
+      </div>
+      
+      <!-- Play Screen -->
+      <div id="play-screen" class="hidden absolute inset-0 w-full h-full flex flex-col items-center justify-center cursor-pointer select-none overflow-hidden" onpointerdown="triggerPop(event)">
+        <div id="timer-display" class="absolute top-5 right-5 bg-white/90 backdrop-blur-sm border border-pink-200 px-4 py-1.5 rounded-full shadow-sm text-pink-600 font-bold text-sm z-50 transition-colors">⏳ 30s</div>
+        <h1 id="score-display" class="font-cute text-[120px] md:text-[140px] leading-none font-bold text-pink-500 drop-shadow-[0_6px_6px_rgba(236,72,153,0.25)] will-change-transform z-10">0</h1>
+        <div id="effect-container" class="absolute inset-0 pointer-events-none"></div>
+        <p class="absolute bottom-5 text-pink-300 text-[11px] font-semibold tracking-wider uppercase pointer-events-none transition-opacity duration-300" id="instruction-text">Tap Anywhere to Score!</p>
+      </div>
+
+      <!-- End Screen -->
+      <div id="end-screen" class="hidden absolute inset-0 w-full h-full bg-white/95 backdrop-blur-md flex flex-col items-center justify-center z-50">
+        <h2 class="text-4xl mb-2">⏰</h2>
+        <h2 class="text-2xl font-bold text-gray-800 mb-1">หมดเวลา!</h2>
+        <p class="text-sm text-gray-500 mb-4">รอบนี้คุณทำได้</p>
+        <p id="final-score" class="font-cute text-6xl font-bold text-pink-500 mb-6">0</p>
+        <button id="retry-btn" onclick="resetToStart()" class="btn-tactile bg-gradient-to-r from-pink-400 to-pink-500 text-white font-bold text-base py-3 px-8 rounded-full shadow-lg shadow-pink-200 border border-pink-400">เล่นใหม่อีกรอบ 🔄</button>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    let currentStudent = null;
+    let score = 0;
+    let isPlaying = false;
+    let timeLeft = 30;
+    let timerInterval; 
+
+    const MAX_HEARTS = 5;
+    const COOLDOWN_MINUTES = 5;
+    const COOLDOWN_MS = COOLDOWN_MINUTES * 60 * 1000;
+    
+    let currentHearts = 5;
+    let lastHeartUpdate = null;
+    let heartTimerInterval;
+
+    const clickEmojis = ['✨','💖','🌸','🎉','🌟','🐱','🐶','🥳','🔥','🎈','⭐','🦄','🎀','🧸','🍭','🌈','🐣','🍀','🍰','💎','🚀','⚡','🍎','🍊','🍓','🍇','🍉','🍌','🍔','🍟','🍕','🍩','🍦','🍧','☕','🍹','🧋','🥞','🐼','🐨','🐸','🐷','🐧','🐙','🐢','🦋','🐝','🐞','🦖','🦕','🐳','🦁','⚽','🏀','🏈','⚾','🎾','🏐','🎱','🎮','🕹️','🎲','🧩','🏆','🥇','🚗','เรือ','🚑','🚒','🚁','✈️','🛸','⛵','🛵','👑','💍','💄','👗','👟','🎒','🕶️','🌂','💯','💥','💫','💦','💨','🐵','🦊','🐰'];
+
+    // 🧑‍🎓 ฟังก์ชันโหลดนักเรียน (ปรับปรุงให้รองรับ Key ทุกรูปแบบ)
+    function initStudent() {
+      const dataStr = localStorage.getItem('krugames_current_student');
+      if (dataStr) {
+        try {
+          currentStudent = JSON.parse(dataStr);
+          document.getElementById('player-name').innerText = currentStudent.name || currentStudent.fullname || currentStudent.studentName || 'ผู้เล่นทั่วไป';
+          
+          // ดึงค่า ชั้นเรียน จาก Key ต่างๆ ที่อาจจะถูกบันทึกมา
+          const rawClass = currentStudent.studentClass || currentStudent.class || currentStudent.room || currentStudent.classroom || currentStudent.grade || '';
+          
+          // ดึงค่า เลขที่ จาก Key ต่างๆ ที่อาจจะถูกบันทึกมา
+          const rawNumber = currentStudent.studentNumber || currentStudent.number || currentStudent.no || currentStudent.num || '';
+          
+          let classStr = rawClass ? (rawClass.toString().includes('ชั้น') ? rawClass : `ชั้น ${rawClass}`) : '';
+          let numStr = rawNumber ? (rawNumber.toString().includes('เลขที่') ? rawNumber : `เลขที่ ${rawNumber}`) : '';
+          
+          let fullInfo = [classStr, numStr].filter(Boolean).join(' ');
+          document.getElementById('player-class').innerText = fullInfo || 'ไม่ได้ระบุชั้นเรียน/เลขที่';
+        } catch(e) {
+          console.error(e);
+        }
+      } else {
+        document.getElementById('player-name').innerText = 'ผู้เล่นทั่วไป';
+        document.getElementById('player-class').innerText = 'ไม่ได้ระบุชั้นเรียน/เลขที่';
+      }
+    }
+
+    function initHearts() {
+      const savedHearts = localStorage.getItem('krugames_hearts');
+      const savedTimestamp = localStorage.getItem('krugames_hearts_timestamp');
+
+      if (savedHearts !== null && savedHearts !== 'undefined') {
+          currentHearts = parseInt(savedHearts, 10);
+          if (isNaN(currentHearts)) currentHearts = MAX_HEARTS;
+      } else {
+          currentHearts = MAX_HEARTS;
+      }
+
+      if (savedTimestamp !== null && savedTimestamp !== 'undefined' && savedTimestamp !== 'null') {
+          lastHeartUpdate = parseInt(savedTimestamp, 10);
+          if (isNaN(lastHeartUpdate)) lastHeartUpdate = null;
+      } else {
+          lastHeartUpdate = null;
+      }
+
+      const now = Date.now();
+      if (currentHearts < MAX_HEARTS) {
+          if (lastHeartUpdate) {
+              const elapsed = now - lastHeartUpdate;
+              const restoredHearts = Math.floor(elapsed / COOLDOWN_MS);
+              if (restoredHearts > 0) {
+                  currentHearts = Math.min(MAX_HEARTS, currentHearts + restoredHearts);
+                  if (currentHearts === MAX_HEARTS) {
+                      lastHeartUpdate = null;
+                  } else {
+                      const remainder = elapsed % COOLDOWN_MS;
+                      lastHeartUpdate = now - remainder;
+                  }
+              }
+          } else {
+              lastHeartUpdate = now;
+          }
+          saveHearts();
+      } else {
+          currentHearts = MAX_HEARTS;
+          lastHeartUpdate = null;
+          saveHearts();
+      }
+
+      updateHeartUI();
+      startHeartTimer();
+    }
+
+    function saveHearts() {
+      localStorage.setItem('krugames_hearts', currentHearts.toString());
+      if (lastHeartUpdate !== null) {
+        localStorage.setItem('krugames_hearts_timestamp', lastHeartUpdate.toString());
+      } else {
+        localStorage.removeItem('krugames_hearts_timestamp');
+      }
+    }
+
+    function updateHeartUI(animIndex = -1, animType = '') {
+      const heartsContainer = document.getElementById('hearts-container');
+      const heartTimer = document.getElementById('heart-timer');
+      const startBtn = document.getElementById('start-btn');
+      const retryBtn = document.getElementById('retry-btn');
+      const noHeartMsg = document.getElementById('no-heart-msg');
+
+      heartsContainer.innerHTML = '';
+
+      for (let i = 1; i <= MAX_HEARTS; i++) {
+        const heartSpan = document.createElement('span');
+        heartSpan.innerText = '❤️';
+        heartSpan.className = 'inline-block transition-all duration-300 transform';
+        
+        if (i <= currentHearts) {
+          if (i === animIndex && animType === 'increase') {
+            heartSpan.classList.add('heart-increase-anim');
+          }
+        } else {
+          heartSpan.classList.add('opacity-25', 'grayscale', 'scale-90');
+          if (i === animIndex && animType === 'decrease') {
+            heartSpan.classList.add('heart-decrease-anim');
+          }
+        }
+        heartsContainer.appendChild(heartSpan);
+      }
+
+      if (currentHearts <= 0) {
+        startBtn.classList.add('btn-disabled'); startBtn.disabled = true;
+        retryBtn.classList.add('btn-disabled'); retryBtn.disabled = true;
+        noHeartMsg.classList.remove('hidden');
+      } else {
+        startBtn.classList.remove('btn-disabled'); startBtn.disabled = false;
+        retryBtn.classList.remove('btn-disabled'); retryBtn.disabled = false;
+        noHeartMsg.classList.add('hidden');
+      }
+
+      if (currentHearts < MAX_HEARTS) {
+          heartTimer.classList.remove('hidden');
+      } else { 
+          heartTimer.classList.add('hidden'); 
+          heartTimer.innerText = "05:00"; 
+      }
+    }
+
+    function startHeartTimer() {
+      if (heartTimerInterval) clearInterval(heartTimerInterval);
+      
+      const tick = () => {
+        if (currentHearts < MAX_HEARTS) {
+          const now = Date.now();
+          if (!lastHeartUpdate) { 
+              lastHeartUpdate = now; 
+              saveHearts(); 
+          }
+          
+          const elapsed = now - lastHeartUpdate;
+          const remaining = COOLDOWN_MS - elapsed;
+
+          if (remaining <= 0) {
+            currentHearts++;
+            if (currentHearts >= MAX_HEARTS) {
+              currentHearts = MAX_HEARTS;
+              lastHeartUpdate = null;
+            } else {
+              lastHeartUpdate += COOLDOWN_MS;
+            }
+            saveHearts();
+            updateHeartUI(currentHearts, 'increase');
+          } else {
+            const minutes = Math.floor(remaining / 60000);
+            const seconds = Math.floor((remaining % 60000) / 1000);
+            const formatted = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            document.getElementById('heart-timer').innerText = formatted;
+          }
+        }
+      };
+
+      tick();
+      heartTimerInterval = setInterval(tick, 1000);
+    }
+
+    function checkWeeklyReset() {
+      const RESET_DAY = 1; const RESET_HOUR = 0; const RESET_MIN = 0; 
+      const lastResetStr = localStorage.getItem('krugames_leaderboard_lastreset');
+      const now = new Date();
+      let shouldReset = false;
+
+      if (!lastResetStr) {
+        shouldReset = true;
+      } else {
+        const lastReset = new Date(parseInt(lastResetStr, 10));
+        const prevMonday = new Date(now);
+        prevMonday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+        prevMonday.setHours(RESET_HOUR, RESET_MIN, 0, 0);
+
+        if (now >= prevMonday && lastReset < prevMonday) shouldReset = true;
+      }
+
+      if (shouldReset) {
+        localStorage.setItem('krugames_realtime_leaderboard', JSON.stringify([]));
+        localStorage.setItem('krugames_leaderboard_lastreset', now.getTime().toString());
+      }
+    }
+
+    function updateLeaderboardUI() {
+      checkWeeklyReset();
+      const rawBoard = localStorage.getItem('krugames_realtime_leaderboard');
+      let board = rawBoard ? JSON.parse(rawBoard) : [];
+      board.sort((a, b) => b.score - a.score);
+
+      const rankBadge = document.getElementById('player-rank');
+      const rankNumber = document.getElementById('rank-number');
+      if (currentStudent && board.length > 0) {
+        const myRankIndex = board.findIndex(item => item.studentId === (currentStudent.id || currentStudent.studentId || currentStudent.name));
+        if (myRankIndex !== -1) {
+          rankBadge.classList.remove('hidden');
+          rankNumber.innerText = `${myRankIndex + 1}`;
+        } else {
+          rankBadge.classList.add('hidden');
+        }
+      } else {
+        rankBadge.classList.add('hidden');
+      }
+
+      const boardContainer = document.getElementById('leaderboard-container');
+      if (board.length === 0) {
+        boardContainer.classList.add('hidden');
+        return;
+      }
+      boardContainer.classList.remove('hidden');
+
+      for (let i = 1; i <= 3; i++) {
+        const card = document.getElementById(`rank-card-${i}`);
+        const nameEl = document.getElementById(`rank-name-${i}`);
+        const scoreEl = document.getElementById(`rank-score-${i}`);
+        
+        if (board[i - 1]) {
+          card.classList.remove('hidden');
+          nameEl.innerText = board[i - 1].name;
+          scoreEl.innerText = board[i - 1].score;
+        } else {
+          card.classList.add('hidden');
+        }
+      }
+    }
+
+    function saveScore(finalScore) {
+      if (!currentStudent) return;
+      checkWeeklyReset();
+
+      const studentId = currentStudent.id || currentStudent.studentId || currentStudent.name;
+      const rawBoard = localStorage.getItem('krugames_realtime_leaderboard');
+      let board = rawBoard ? JSON.parse(rawBoard) : [];
+      const index = board.findIndex(item => item.studentId === studentId);
+
+      if (index !== -1) {
+        if (finalScore > board[index].score) {
+          board[index].score = finalScore;
+          board[index].updatedAt = Date.now();
+        }
+      } else {
+        board.push({
+          studentId: studentId,
+          name: currentStudent.name || currentStudent.fullname || 'ผู้เล่นทั่วไป',
+          score: finalScore,
+          updatedAt: Date.now()
+        });
+      }
+
+      localStorage.setItem('krugames_realtime_leaderboard', JSON.stringify(board));
+      updateLeaderboardUI();
+    }
+
+    function startGame() {
+      if (currentHearts <= 0) return;
+
+      const spentHeartIndex = currentHearts;
+      currentHearts--;
+      if (lastHeartUpdate === null) lastHeartUpdate = Date.now();
+      saveHearts();
+      updateHeartUI(spentHeartIndex, 'decrease');
+      startHeartTimer(); 
+
+      score = 0;
+      timeLeft = 30;
+      isPlaying = true;
+      
+      document.getElementById('score-display').innerText = score;
+      document.getElementById('timer-display').innerText = `⏳ ${timeLeft}s`;
+      document.getElementById('timer-display').className = "absolute top-5 right-5 bg-white/90 backdrop-blur-sm border border-pink-200 px-4 py-1.5 rounded-full shadow-sm text-pink-600 font-bold text-sm z-50 transition-colors";
+      
+      document.getElementById('start-screen').classList.add('hidden');
+      document.getElementById('end-screen').classList.add('hidden');
+      document.getElementById('play-screen').classList.remove('hidden');
+      
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        const timerDisplay = document.getElementById('timer-display');
+        timerDisplay.innerText = `⏳ ${timeLeft}s`;
+
+        if (timeLeft <= 5 && timeLeft > 0) {
+          timerDisplay.className = "absolute top-5 right-5 bg-red-500 border border-red-400 px-4 py-1.5 rounded-full shadow-md text-white font-bold text-sm z-50 animate-ping";
+        }
+
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          endGame();
+        }
+      }, 1000);
+    }
+
+    function endGame() {
+      isPlaying = false;
+      document.getElementById('play-screen').classList.add('hidden');
+      document.getElementById('end-screen').classList.remove('hidden');
+      document.getElementById('final-score').innerText = score;
+      saveScore(score);
+    }
+
+    function resetToStart() {
+      document.getElementById('end-screen').classList.add('hidden');
+      document.getElementById('start-screen').classList.remove('hidden');
+    }
+
+    function triggerPop(e) {
+      if (!isPlaying) return;
+      
+      score++;
+      const scoreEl = document.getElementById('score-display');
+      scoreEl.innerText = score;
+      
+      scoreEl.classList.remove('score-bounce');
+      void scoreEl.offsetWidth; 
+      scoreEl.classList.add('score-bounce');
+
+      const effectContainer = document.getElementById('effect-container');
+      const rect = effectContainer.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      const ripple = document.createElement('div');
+      ripple.className = 'ripple';
+      ripple.style.left = `${x}px`;
+      ripple.style.top = `${y}px`;
+      effectContainer.appendChild(ripple);
+
+      const emojiEl = document.createElement('div');
+      emojiEl.className = 'floating-emoji';
+      emojiEl.innerText = clickEmojis[Math.floor(Math.random() * clickEmojis.length)];
+      emojiEl.style.left = `${x - 24}px`;
+      emojiEl.style.top = `${y - 24}px`;
+      effectContainer.appendChild(emojiEl);
+
+      setTimeout(() => { ripple.remove(); emojiEl.remove(); }, 700);
+    }
+
+    function goBack() {
+      window.location.href = 'index.html';
+    }
+
+    window.onload = function() {
+      initStudent();
+      initHearts();
+      updateLeaderboardUI();
+    };
+  </script>
+</body>
+</html>

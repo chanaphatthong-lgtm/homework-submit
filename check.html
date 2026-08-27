@@ -81,12 +81,24 @@
 </head>
 <body class="min-h-screen text-gray-800">
 
-  <nav id="back-nav" class="pt-6 px-5 max-w-lg mx-auto flex items-center">
+  <nav id="back-nav" class="pt-6 px-5 max-w-lg mx-auto flex items-center justify-between">
+    <!-- ปุ่มย้อนกลับ (ซ้าย) -->
     <button onclick="goBack()" class="btn-tactile flex items-center justify-center w-10 h-10 bg-white rounded-full shadow-sm text-[#293B86] hover:bg-gray-50 border border-gray-100 transition-colors">
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
       </svg>
     </button>
+
+    <!-- ไอคอนไปหน้าเกมส์ (ขวา) - ซ่อนไว้ก่อนด้วย class "hidden" -->
+    <a id="gameButton" onclick="goToGame()" class="hidden btn-tactile flex items-center justify-center w-10 h-10 bg-white rounded-full shadow-sm text-[#293B86] hover:bg-gray-50 border border-gray-100 transition-colors cursor-pointer" title="เล่นเกมส์">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+        <rect width="20" height="12" x="2" y="6" rx="2"/>
+        <path d="M6 12h4"/>
+        <path d="M8 10v4"/>
+        <path d="M15 13h.01"/>
+        <path d="M18 11h.01"/>
+      </svg>
+    </a>
   </nav>
 
   <header class="pt-6 pb-6 px-5 max-w-lg mx-auto text-center space-y-2 relative z-10">
@@ -274,6 +286,9 @@
     }
 
     function goBack() { window.location.href = 'index.html'; }
+    
+    // 🎮 ฟังก์ชันสำหรับไปหน้าเกม
+    function goToGame() { window.location.href = 'game.html'; }
 
     // ฟังก์ชันสร้าง UI การ์ดคะแนนสอบปกติ
     function generateExamCardHTML(title, scoreRaw, badgeText, delayMs) {
@@ -394,6 +409,16 @@
         let result = await res.json();
 
         if(result.isOk) {
+          
+          // 💾 บันทึกข้อมูลนักเรียนเก็บไว้ใช้งานต่อใน game.html
+          const studentInfo = {
+            name: student.name,
+            number: student.number,
+            classroom: student.classroom,
+            studentId: result.studentId || ''
+          };
+          SafeStorage.set('krugames_current_student', JSON.stringify(studentInfo));
+
           document.getElementById('res-name').innerText = student.name;
           document.getElementById('res-class').innerText = `เลขที่ ${student.number} | ${student.classroom}`;
           
@@ -544,6 +569,10 @@
 
           document.getElementById('search-container').classList.add('hidden');
           document.getElementById('result-area').classList.remove('hidden');
+          
+          // 🎮 แสดงปุ่มเล่นเกม หลังจากเช็คข้อมูลเสร็จเรียบร้อย
+          document.getElementById('gameButton').classList.remove('hidden');
+          
           window.scrollTo({ top: 0, behavior: 'smooth' });
         } else {
           showToast('❌ ข้อผิดพลาด: ' + result.error);

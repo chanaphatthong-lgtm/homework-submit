@@ -9,14 +9,39 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fredoka:wght@600;700&display=swap" rel="stylesheet">
   
   <style>
-    * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
-    html, body { font-family: 'DM Sans', sans-serif; max-width: 100vw; overflow-x: hidden; margin: 0; min-height: 100vh; touch-action: manipulation; }
+    * { 
+      -webkit-tap-highlight-color: transparent; 
+      box-sizing: border-box; 
+    }
     
-    /* 🌸 พื้นหลังสมูท 60FPS */
-    body { background: linear-gradient(-45deg, #fce7f3, #fdf2f8, #ffe4e6, #fff1f2); background-size: 400% 400%; animation: gradientBG 12s ease infinite; }
+    /* 🔒 ล็อกและขยายพื้นหลังให้เต็ม 100% ทุกอุปกรณ์ (มือถือ, ไอแพด, โน๊ตบุ๊ค) */
+    html, body { 
+      font-family: 'DM Sans', sans-serif; 
+      width: 100%;
+      height: 100%;
+      min-height: 100vh;
+      min-height: 100dvh;
+      overflow: hidden !important; 
+      position: fixed;
+      inset: 0;
+      margin: 0; 
+      padding: 0;
+      touch-action: none !important;
+      overscroll-behavior: none !important;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    
+    /* 🌸 พื้นหลังพาสเทลสมูท ขยายเต็มจอทุกความละเอียด */
+    body { 
+      background: linear-gradient(-45deg, #fce7f3, #fdf2f8, #ffe4e6, #fff1f2); 
+      background-size: 400% 400%; 
+      background-attachment: fixed;
+      animation: gradientBG 12s ease infinite; 
+    }
     @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
     
-    .btn-tactile { transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    .btn-tactile { transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); touch-action: manipulation; }
     .btn-tactile:hover:not(:disabled) { transform: scale(1.05); filter: brightness(1.03); }
     .btn-tactile:active:not(:disabled) { transform: scale(0.95) translateY(2px); }
     .btn-disabled { opacity: 0.6; cursor: not-allowed; filter: grayscale(100%); }
@@ -52,83 +77,88 @@
     .heart-increase-anim { animation: heartIncrease 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
   </style>
 </head>
-<body class="text-gray-800 flex flex-col items-center">
+<body class="text-gray-800 flex flex-col items-center justify-between w-full h-full p-0 m-0 select-none">
 
-  <nav class="w-full pt-6 px-5 max-w-2xl mx-auto flex items-center justify-between relative z-20">
-    <button onclick="goBack()" class="btn-tactile flex items-center justify-center w-10 h-10 bg-white rounded-full shadow-sm border border-pink-100 text-pink-500 hover:bg-pink-50 transition-colors">
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
+  <!-- Nav Bar -->
+  <nav class="w-full pt-4 px-6 max-w-xl md:max-w-2xl lg:max-w-4xl mx-auto flex items-center justify-between relative z-20 flex-shrink-0">
+    <button onclick="goBack()" class="btn-tactile flex items-center justify-center w-10 h-10 md:w-12 md:h-12 bg-white rounded-full shadow-sm border border-pink-100 text-pink-500 hover:bg-pink-50 transition-colors">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5 md:w-6 md:h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
     </button>
     
-    <!-- กล่องแสดงหัวใจ 5 ดวงเรียงกัน -->
-    <div class="bg-white/90 backdrop-blur-sm border border-pink-100 px-3 py-1.5 rounded-full shadow-sm flex items-center gap-2 transition-all">
-      <div id="hearts-container" class="flex items-center gap-1 text-sm md:text-base"></div>
-      <span id="heart-timer" class="text-[11px] text-pink-500 font-bold bg-pink-50 px-2 py-0.5 rounded-full hidden">05:00</span>
+    <div class="bg-white/90 backdrop-blur-sm border border-pink-100 px-4 py-2 rounded-full shadow-sm flex items-center gap-2 transition-all">
+      <div id="hearts-container" class="flex items-center gap-1.5 text-base md:text-xl"></div>
+      <span id="heart-timer" class="text-xs md:text-sm text-pink-500 font-bold bg-pink-50 px-2.5 py-0.5 rounded-full hidden">05:00</span>
     </div>
   </nav>
 
-  <header class="pb-4 pt-2 px-5 w-full max-w-2xl text-center relative z-10">
-    <div class="inline-block bg-white/80 backdrop-blur-sm px-6 py-3 rounded-2xl shadow-sm border border-pink-100/50">
-      <p class="text-[11px] text-pink-500 font-semibold uppercase tracking-wider mb-1">PLAYER</p>
+  <!-- Player Header -->
+  <header class="pb-2 pt-2 px-6 w-full max-w-xl md:max-w-2xl lg:max-w-4xl text-center relative z-10 flex-shrink-0">
+    <div class="inline-block bg-white/80 backdrop-blur-sm px-6 py-2.5 md:px-8 md:py-3 rounded-2xl shadow-sm border border-pink-100/50">
+      <p class="text-[10px] md:text-xs text-pink-500 font-semibold uppercase tracking-wider mb-0.5">PLAYER</p>
       
-      <!-- ชื่อผู้เล่น + ป้ายอันดับด้านขวา -->
       <div class="flex items-center justify-center gap-2">
-        <p id="player-name" class="text-lg font-bold text-gray-900">กำลังโหลด...</p>
-        <span id="player-rank" class="bg-gradient-to-r from-amber-400 to-orange-400 text-white text-[11px] px-2.5 py-0.5 rounded-full font-bold shadow-sm flex items-center gap-1 hidden">
+        <p id="player-name" class="text-base md:text-xl font-bold text-gray-900">กำลังโหลด...</p>
+        <span id="player-rank" class="bg-gradient-to-r from-amber-400 to-orange-400 text-white text-[10px] md:text-xs px-2.5 py-0.5 rounded-full font-bold shadow-sm flex items-center gap-1 hidden">
           🏆 อันดับ <span id="rank-number">-</span>
         </span>
       </div>
 
-      <p id="player-class" class="text-[14px] text-gray-500 font-medium mt-0.5">-</p>
+      <p id="player-class" class="text-xs md:text-sm text-gray-500 font-medium mt-0.5">-</p>
     </div>
   </header>
 
-  <main class="w-full max-w-2xl mx-auto px-5 pb-10 flex-grow flex flex-col relative z-10">
-    <div class="game-card flex-grow rounded-[2rem] p-5 relative overflow-hidden flex flex-col items-center justify-between min-h-[460px]">
+  <!-- Main Game Card Container -->
+  <main class="w-full max-w-xl md:max-w-2xl lg:max-w-3xl mx-auto px-4 pb-6 flex-grow flex flex-col relative z-10 overflow-hidden">
+    <div class="game-card flex-grow rounded-[2rem] p-4 md:p-6 relative overflow-hidden flex flex-col items-center justify-between h-full">
       
       <!-- Leaderboard (Top 3) -->
-      <div id="leaderboard-container" class="hidden w-full bg-white/70 backdrop-blur-md rounded-2xl p-3 border border-pink-100 shadow-sm relative z-20 transition-all duration-300">
-        <div class="text-center mb-2">
-          <span class="text-[11px] font-bold text-pink-500 uppercase tracking-widest">🏆 WEEKLY TOP 3</span>
+      <div id="leaderboard-container" class="hidden w-full bg-white/70 backdrop-blur-md rounded-2xl p-3 border border-pink-100 shadow-sm relative z-20 transition-all duration-300 flex-shrink-0">
+        <div class="text-center mb-1.5">
+          <span class="text-[10px] md:text-xs font-bold text-pink-500 uppercase tracking-widest">🏆 WEEKLY TOP 3</span>
         </div>
-        <div class="flex justify-center gap-2 text-center">
-          <div id="rank-card-1" class="hidden flex-1 max-w-[110px] bg-amber-50/90 border border-amber-200/80 rounded-xl p-2 flex flex-col items-center transition-all duration-300"><span class="text-sm">🥇</span><span id="rank-name-1" class="text-[12px] font-bold text-gray-800 truncate w-full mt-0.5"></span><span id="rank-score-1" class="font-cute text-sm font-bold text-amber-600"></span></div>
-          <div id="rank-card-2" class="hidden flex-1 max-w-[110px] bg-slate-50/90 border border-slate-200/80 rounded-xl p-2 flex flex-col items-center transition-all duration-300"><span class="text-sm">🥈</span><span id="rank-name-2" class="text-[12px] font-bold text-gray-800 truncate w-full mt-0.5"></span><span id="rank-score-2" class="font-cute text-sm font-bold text-slate-600"></span></div>
-          <div id="rank-card-3" class="hidden flex-1 max-w-[110px] bg-orange-50/90 border border-orange-200/80 rounded-xl p-2 flex flex-col items-center transition-all duration-300"><span class="text-sm">🥉</span><span id="rank-name-3" class="text-[12px] font-bold text-gray-800 truncate w-full mt-0.5"></span><span id="rank-score-3" class="font-cute text-sm font-bold text-orange-600"></span></div>
+        <div class="flex justify-center gap-2 md:gap-4 text-center">
+          <div id="rank-card-1" class="hidden flex-1 max-w-[120px] bg-amber-50/90 border border-amber-200/80 rounded-xl p-2 flex flex-col items-center transition-all duration-300"><span class="text-sm md:text-base">🥇</span><span id="rank-name-1" class="text-xs md:text-sm font-bold text-gray-800 truncate w-full mt-0.5"></span><span id="rank-score-1" class="font-cute text-xs md:text-sm font-bold text-amber-600"></span></div>
+          <div id="rank-card-2" class="hidden flex-1 max-w-[120px] bg-slate-50/90 border border-slate-200/80 rounded-xl p-2 flex flex-col items-center transition-all duration-300"><span class="text-sm md:text-base">🥈</span><span id="rank-name-2" class="text-xs md:text-sm font-bold text-gray-800 truncate w-full mt-0.5"></span><span id="rank-score-2" class="font-cute text-xs md:text-sm font-bold text-slate-600"></span></div>
+          <div id="rank-card-3" class="hidden flex-1 max-w-[120px] bg-orange-50/90 border border-orange-200/80 rounded-xl p-2 flex flex-col items-center transition-all duration-300"><span class="text-sm md:text-base">🥉</span><span id="rank-name-3" class="text-xs md:text-sm font-bold text-gray-800 truncate w-full mt-0.5"></span><span id="rank-score-3" class="font-cute text-xs md:text-sm font-bold text-orange-600"></span></div>
         </div>
       </div>
 
       <!-- Start Screen -->
       <div id="start-screen" class="my-auto text-center w-full flex flex-col items-center justify-center transition-opacity duration-300">
-        <div class="bg-pink-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce shadow-inner">
-          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ec4899" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="12" x="2" y="6" rx="2"/><path d="M6 12h4"/><path d="M8 10v4"/><path d="M15 13h.01"/><path d="M18 11h.01"/></svg>
+        <div class="bg-pink-100 w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center mx-auto mb-3 animate-bounce shadow-inner">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 md:w-10 md:h-10 text-pink-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="12" x="2" y="6" rx="2"/><path d="M6 12h4"/><path d="M8 10v4"/><path d="M15 13h.01"/><path d="M18 11h.01"/></svg>
         </div>
-        <h2 class="text-2xl font-bold text-gray-800 mb-1">Tap Emoji Clicker! ✨</h2>
-        <p class="text-xs text-gray-500 mb-6">คุณมีเวลา <span class="font-bold text-pink-500">30 วินาที</span> ในการไต่อันดับ!</p>
-        <button id="start-btn" onclick="startGame()" class="btn-tactile bg-gradient-to-r from-pink-400 to-pink-500 text-white font-bold text-base py-3 px-8 rounded-full shadow-lg shadow-pink-200 border border-pink-400">เริ่มเกมเลย!</button>
-        <p id="no-heart-msg" class="text-xs text-red-500 font-bold mt-3 hidden">รอหัวใจฟื้นฟูเพื่อเล่นต่อนะ!</p>
+        <h2 class="text-xl md:text-3xl font-bold text-gray-800 mb-1">Tap Emoji Clicker! ✨</h2>
+        <p class="text-xs md:text-sm text-gray-500 mb-6">คุณมีเวลา <span class="font-bold text-pink-500">30 วินาที</span> ในการไต่อันดับ!</p>
+        <button id="start-btn" onclick="startGame()" class="btn-tactile bg-gradient-to-r from-pink-400 to-pink-500 text-white font-bold text-base md:text-lg py-3 px-10 rounded-full shadow-lg shadow-pink-200 border border-pink-400">เริ่มเกมเลย!</button>
+        <p id="no-heart-msg" class="text-xs md:text-sm text-red-500 font-bold mt-3 hidden">รอหัวใจฟื้นฟูเพื่อเล่นต่อนะ!</p>
       </div>
       
       <!-- Play Screen -->
       <div id="play-screen" class="hidden absolute inset-0 w-full h-full flex flex-col items-center justify-center cursor-pointer select-none overflow-hidden" onpointerdown="triggerPop(event)">
-        <div id="timer-display" class="absolute top-5 right-5 bg-white/90 backdrop-blur-sm border border-pink-200 px-4 py-1.5 rounded-full shadow-sm text-pink-600 font-bold text-sm z-50 transition-colors">⏳ 30s</div>
-        <h1 id="score-display" class="font-cute text-[120px] md:text-[140px] leading-none font-bold text-pink-500 drop-shadow-[0_6px_6px_rgba(236,72,153,0.25)] will-change-transform z-10">0</h1>
+        <div id="timer-display" class="absolute top-4 right-4 bg-white/90 backdrop-blur-sm border border-pink-200 px-4 py-1.5 rounded-full shadow-sm text-pink-600 font-bold text-sm md:text-base z-50 transition-colors">⏳ 30s</div>
+        <h1 id="score-display" class="font-cute text-[100px] md:text-[150px] lg:text-[170px] leading-none font-bold text-pink-500 drop-shadow-[0_6px_6px_rgba(236,72,153,0.25)] will-change-transform z-10">0</h1>
         <div id="effect-container" class="absolute inset-0 pointer-events-none"></div>
-        <p class="absolute bottom-5 text-pink-300 text-[11px] font-semibold tracking-wider uppercase pointer-events-none transition-opacity duration-300" id="instruction-text">Tap Anywhere to Score!</p>
+        <p class="absolute bottom-4 text-pink-300 text-xs md:text-sm font-semibold tracking-wider uppercase pointer-events-none transition-opacity duration-300" id="instruction-text">Tap Anywhere to Score!</p>
       </div>
 
       <!-- End Screen -->
       <div id="end-screen" class="hidden absolute inset-0 w-full h-full bg-white/95 backdrop-blur-md flex flex-col items-center justify-center z-50">
-        <h2 class="text-4xl mb-2">⏰</h2>
-        <h2 class="text-2xl font-bold text-gray-800 mb-1">หมดเวลา!</h2>
-        <p class="text-sm text-gray-500 mb-4">รอบนี้คุณทำได้</p>
-        <p id="final-score" class="font-cute text-6xl font-bold text-pink-500 mb-6">0</p>
-        <button id="retry-btn" onclick="resetToStart()" class="btn-tactile bg-gradient-to-r from-pink-400 to-pink-500 text-white font-bold text-base py-3 px-8 rounded-full shadow-lg shadow-pink-200 border border-pink-400">เล่นใหม่อีกรอบ 🔄</button>
+        <h2 class="text-4xl md:text-5xl mb-2">⏰</h2>
+        <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-1">หมดเวลา!</h2>
+        <p class="text-sm md:text-base text-gray-500 mb-3">รอบนี้คุณทำได้</p>
+        <p id="final-score" class="font-cute text-6xl md:text-7xl font-bold text-pink-500 mb-6">0</p>
+        <button id="retry-btn" onclick="resetToStart()" class="btn-tactile bg-gradient-to-r from-pink-400 to-pink-500 text-white font-bold text-base md:text-lg py-3 px-10 rounded-full shadow-lg shadow-pink-200 border border-pink-400">เล่นใหม่อีกรอบ 🔄</button>
       </div>
 
     </div>
   </main>
 
   <script>
+    document.addEventListener('touchmove', function(e) {
+      e.preventDefault();
+    }, { passive: false });
+
     let currentStudent = null;
     let score = 0;
     let isPlaying = false;
@@ -143,9 +173,8 @@
     let lastHeartUpdate = null;
     let heartTimerInterval;
 
-    const clickEmojis = ['✨','💖','🌸','🎉','🌟','🐱','🐶','🥳','🔥','🎈','⭐','🦄','🎀','🧸','🍭','🌈','🐣','🍀','🍰','💎','🚀','⚡','🍎','🍊','🍓','🍇','🍉','🍌','🍔','🍟','🍕','🍩','🍦','🍧','☕','🍹','🧋','🥞','🐼','🐨','🐸','🐷','🐧','🐙','🐢','🦋','🐝','🐞','🦖','🦕','🐳','🦁','⚽','🏀','🏈','⚾','🎾','🏐','🎱','🎮','🕹️','🎲','🧩','🏆','🥇','🚗','เรือ','🚑','🚒','🚁','✈️','🛸','⛵','🛵','👑','💍','💄','👗','👟','🎒','🕶️','🌂','💯','💥','💫','💦','💨','🐵','🦊','🐰'];
+    const clickEmojis = ['✨','💖','🌸','🎉','🌟','🐱','🐶','🥳','🔥','🎈','⭐','🦄','🎀','🧸','🍭','🌈','🐣','🍀','🍰','💎','🚀','⚡','🍎','🍊','🍓','🍇','🍉','🍌','🍔','🍟','🍕','🍩','🍦','🍧','☕','🍹','🧋','🥞','🐼','🐨','🐸','🐷','🐧','🐙','🐢','🦋','🐝','🐞','🦖','🦕','🐳','🦁','⚽','🏀','🏈','⚾','🎾','🏐','🎱','🎮','🕹️','🎲','🧩','🏆','🥇','🚗','🚓','🚑','🚒','🚁','✈️','🛸','⛵','🛵','👑','💍','💄','👗','👟','🎒','🕶️','🌂','💯','💥','💫','💦','💨','🐵','🦊','🐰'];
 
-    // 🧑‍🎓 ฟังก์ชันโหลดนักเรียน (ปรับปรุงให้รองรับ Key ทุกรูปแบบ)
     function initStudent() {
       const dataStr = localStorage.getItem('krugames_current_student');
       if (dataStr) {
@@ -153,10 +182,7 @@
           currentStudent = JSON.parse(dataStr);
           document.getElementById('player-name').innerText = currentStudent.name || currentStudent.fullname || currentStudent.studentName || 'ผู้เล่นทั่วไป';
           
-          // ดึงค่า ชั้นเรียน จาก Key ต่างๆ ที่อาจจะถูกบันทึกมา
           const rawClass = currentStudent.studentClass || currentStudent.class || currentStudent.room || currentStudent.classroom || currentStudent.grade || '';
-          
-          // ดึงค่า เลขที่ จาก Key ต่างๆ ที่อาจจะถูกบันทึกมา
           const rawNumber = currentStudent.studentNumber || currentStudent.number || currentStudent.no || currentStudent.num || '';
           
           let classStr = rawClass ? (rawClass.toString().includes('ชั้น') ? rawClass : `ชั้น ${rawClass}`) : '';
@@ -418,7 +444,7 @@
       
       document.getElementById('score-display').innerText = score;
       document.getElementById('timer-display').innerText = `⏳ ${timeLeft}s`;
-      document.getElementById('timer-display').className = "absolute top-5 right-5 bg-white/90 backdrop-blur-sm border border-pink-200 px-4 py-1.5 rounded-full shadow-sm text-pink-600 font-bold text-sm z-50 transition-colors";
+      document.getElementById('timer-display').className = "absolute top-4 right-4 bg-white/90 backdrop-blur-sm border border-pink-200 px-4 py-1.5 rounded-full shadow-sm text-pink-600 font-bold text-sm md:text-base z-50 transition-colors";
       
       document.getElementById('start-screen').classList.add('hidden');
       document.getElementById('end-screen').classList.add('hidden');
@@ -431,7 +457,7 @@
         timerDisplay.innerText = `⏳ ${timeLeft}s`;
 
         if (timeLeft <= 5 && timeLeft > 0) {
-          timerDisplay.className = "absolute top-5 right-5 bg-red-500 border border-red-400 px-4 py-1.5 rounded-full shadow-md text-white font-bold text-sm z-50 animate-ping";
+          timerDisplay.className = "absolute top-4 right-4 bg-red-500 border border-red-400 px-4 py-1.5 rounded-full shadow-md text-white font-bold text-sm md:text-base z-50 animate-ping";
         }
 
         if (timeLeft <= 0) {

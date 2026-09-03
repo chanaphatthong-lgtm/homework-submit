@@ -89,7 +89,7 @@
       </svg>
     </button>
 
-    <!-- ไอคอนไปหน้าเกมส์ (ขวา) - ซ่อนไว้ก่อนด้วย class "hidden" -->
+    <!-- ไอคอนไปหน้าเกมส์ (ขวา) -->
     <a id="gameButton" onclick="goToGame()" class="hidden btn-tactile flex items-center justify-center w-10 h-10 bg-white rounded-full shadow-sm text-[#293B86] hover:bg-gray-50 border border-gray-100 transition-colors cursor-pointer" title="เล่นเกมส์">
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
         <rect width="20" height="12" x="2" y="6" rx="2"/>
@@ -177,7 +177,7 @@
     // =========================================
     // ⚙️ URL ของ Web App (อย่าลืมเปลี่ยนให้ตรงกับตัวล่าสุด)
     // =========================================
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx47pNpAOEXiuKGQnYARQCL1WPCtcL8EZyBd5LtCPPLZRQF91hLkNe4Jldv_QfE2FU_5g/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwrDwg4uaqICXibP3oR7DZfZ7gnjK2CZrXrWZqeIGTE-XVGSCy_gwNBpdb2zGywpFKZ6w/exec';
     
     let allStudents = [];
     let allAssignments = [];
@@ -286,11 +286,8 @@
     }
 
     function goBack() { window.location.href = 'index.html'; }
-    
-    // 🎮 ฟังก์ชันสำหรับไปหน้าเกม
     function goToGame() { window.location.href = 'game.html'; }
 
-    // ฟังก์ชันสร้าง UI การ์ดคะแนนสอบปกติ
     function generateExamCardHTML(title, scoreRaw, badgeText, delayMs) {
       let parsedScore = parseFloat(scoreRaw);
       let defaultTitle = title || 'การทดสอบวัดผล';
@@ -344,7 +341,6 @@
       }
     }
 
-    // ⚡ ฟังก์ชันสำหรับสอบกลางภาค 
     function generateMidtermCardHTML(title, scoreRaw, delayMs) {
       let defaultTitle = title || 'คะแนนสอบกลางภาค';
       let parsedScore = parseFloat(scoreRaw);
@@ -410,7 +406,6 @@
 
         if(result.isOk) {
           
-          // 💾 บันทึกข้อมูลนักเรียนเก็บไว้ใช้งานต่อใน game.html
           const studentInfo = {
             name: student.name,
             number: student.number,
@@ -435,22 +430,13 @@
           }
           document.getElementById('res-hw-score').innerText = computedTotalScore;
 
-          // ⚡ อัปเดตการ์ดคะแนนสอบ (เรียงลำดับใหม่ตามที่คุณครูต้องการ)
           const examContainer = document.getElementById('exam-container');
-          
           let title2and3 = (result.exam2Title && result.exam2Title !== "สอบบทที่ 2") ? result.exam2Title : "คะแนนสอบบทที่ 2 และ 3";
 
           examContainer.innerHTML = 
-            // 1. อันบนสุด คะแนนสอบบทที่ 1
             generateExamCardHTML(result.exam1Title, result.exam1Score, 'บทที่ 1', 40) +
-            
-            // 2. ต่อมา คะแนนสอบบทที่ 2 และ 3 (รวมช่องเดียวกัน โดยใช้ข้อมูลจาก exam2)
             generateExamCardHTML(title2and3, result.exam2Score, 'บทที่ 2 และ 3', 70) +
-            
-            // 3. ต่อมา คะแนนสอบกลางภาค
             generateMidtermCardHTML('คะแนนสอบกลางภาค', result.midtermScore, 100) +
-            
-            // 4. ต่อมา คะแนนสอบบทที่ 4 (ดึงจาก exam4 ที่เพิ่งทำเพิ่มไป)
             generateExamCardHTML(result.exam4Title, result.exam4Score, 'บทที่ 4', 130);
 
           const hwContainer = document.getElementById('homework-list');
@@ -474,10 +460,6 @@
               };
             });
 
-            // ==========================================
-            // อัปเดตส่วน HTML สร้างการ์ดชิ้นงานแบบใหม่ตรงนี้
-            // ==========================================
-            // ฟังก์ชันช่วยแปลงวันที่และเวลาให้เป็น "ดด ม.ค. ปี 2 หลัก" เสมอ
             const formatThaiDate = (dateStr) => {
               if (!dateStr || dateStr === '-') return '';
               
@@ -521,7 +503,8 @@
               
               if (h.isSubmitted) {
                 if (h.isLate) {
-                  statusText = displayDate ? `ส่งช้า (${displayDate})` : 'ส่งช้า';
+                  // 🟢 แก้ไขตรงนี้: ไม่แสดงวันที่หากส่งช้า
+                  statusText = 'ส่งช้า';
                   statusColor = "text-[#F59E0B]";
                   dotColor = "bg-[#F59E0B]";
                 } else {
@@ -569,8 +552,6 @@
 
           document.getElementById('search-container').classList.add('hidden');
           document.getElementById('result-area').classList.remove('hidden');
-          
-          // 🎮 แสดงปุ่มเล่นเกม หลังจากเช็คข้อมูลเสร็จเรียบร้อย
           document.getElementById('gameButton').classList.remove('hidden');
           
           window.scrollTo({ top: 0, behavior: 'smooth' });

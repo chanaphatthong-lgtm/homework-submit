@@ -145,13 +145,14 @@
   <div id="toast" class="fixed top-12 left-1/2 bg-gray-900/95 backdrop-blur-md text-white px-8 py-4 rounded-2xl shadow-2xl text-base font-semibold z-50 text-center max-w-[90%] w-max border border-gray-700 toast-animate"></div>
 
   <script>
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx47pNpAOEXiuKGQnYARQCL1WPCtcL8EZyBd5LtCPPLZRQF91hLkNe4Jldv_QfE2FU_5g/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwrDwg4uaqICXibP3oR7DZfZ7gnjK2CZrXrWZqeIGTE-XVGSCy_gwNBpdb2zGywpFKZ6w/exec';
     let globalData = [];
     let toastTimeout;
 
     window.onload = async function() {
       try {
         const response = await fetch(`${SCRIPT_URL}?type=init`);
+        if(!response.ok) throw new Error('Network error');
         globalData = await response.json();
         
         const classrooms = [...new Set(globalData.filter(d => d.type === 'student').map(d => d.classroom))].sort();
@@ -234,31 +235,42 @@
 
       try {
         const response = await fetch(`${SCRIPT_URL}?action=getAdminView&classroom=${encodeURIComponent(classroom)}&assignment=${encodeURIComponent(assignment)}`);
+        if(!response.ok) throw new Error('HTTP Status Error');
         const result = await response.json();
 
-        if(result.isOk) {
+        if (result && result.isOk && Array.isArray(result.data)) {
+          if (result.data.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" class="text-center py-12 text-gray-500 font-semibold text-xl">⚠️ ไม่พบข้อมูลนักเรียนในห้องนี้</td></tr>`;
+            return;
+          }
+
           const rowsHTML = result.data.map(std => {
             let imgHTML = '<span class="text-gray-400 text-sm">ไม่มีรูป</span>';
             let statusBadge = '<span class="bg-red-50 text-red-600 px-4 py-2 rounded-full text-sm font-bold border border-red-200">ยังไม่ส่ง</span>';
             
-            if (std.isSubmitted) {
+            const sub = std.submission; // ดึงออบเจ็กต์การส่งงานจากคีย์ submission
+
+            if (sub) {
+              let lateBadge = sub.isLate ? '<span class="block text-xs text-amber-600 font-bold bg-amber-50 px-2 py-0.5 rounded border border-amber-200 mt-1">ส่งล่าช้า</span>' : '';
               statusBadge = `
-                <div class="flex flex-col items-center gap-2">
+                <div class="flex flex-col items-center gap-1">
                   <span class="bg-green-50 text-green-700 px-4 py-2 rounded-full text-sm font-bold border border-green-200">ส่งแล้ว</span>
-                  <span class="text-xs text-gray-500 font-mono">${std.submittedDate}</span>
+                  <span class="text-xs text-gray-500 font-mono">${sub.date || ''}</span>
+                  ${lateBadge}
                 </div>`;
               
-              const directImgUrl = getDirectImgUrl(std.fileUrl);
+              const rawImgUrl = (sub.imgLink && sub.imgLink !== '-') ? sub.imgLink : sub.link;
+              const directImgUrl = getDirectImgUrl(rawImgUrl);
+
               if(directImgUrl) {
                 imgHTML = `
-                  <a href="${std.fileUrl}" target="_blank" class="flex justify-center">
-                    <img src="${directImgUrl}" loading="lazy" class="img-preview" title="คลิกเพื่อเปิดดูขนาดเต็ม" onerror="this.onerror=null; this.outerHTML='<a href=&quot;${std.fileUrl}&quot; target=&quot;_blank&quot; class=&quot;text-blue-600 underline text-sm font-semibold hover:text-blue-800&quot;>เปิดดูรูปผลงาน</a>';">
+                  <a href="${rawImgUrl}" target="_blank" class="flex justify-center">
+                    <img src="${directImgUrl}" loading="lazy" class="img-preview" title="คลิกเพื่อเปิดดูขนาดเต็ม" onerror="this.onerror=null; this.outerHTML='<a href=&quot;${rawImgUrl}&quot; target=&quot;_blank&quot; class=&quot;text-blue-600 underline text-sm font-semibold hover:text-blue-800&quot;>เปิดดูรูปผลงาน</a>';">
                   </a>`;
               }
             }
 
-            // จัดการกรณีที่ยังไม่เคยมีคะแนน ไม่ให้แสดงเป็นคำว่า undefined
-            let currentScore = (std.score !== undefined && std.score !== null && std.score !== '-' && std.score !== '') ? std.score : '';
+            let currentScore = (sub && sub.score !== undefined && sub.score !== null && sub.score !== '-' && sub.score !== '') ? sub.score : '';
 
             return `
               <tr class="hover:bg-blue-50/50 transition-colors duration-200">
@@ -269,7 +281,6 @@
                 <td class="py-5 px-6">
                   <div class="flex items-center justify-start gap-3">
                     <input type="number" class="hw-input !py-3 !px-4 !w-28 text-center font-bold text-blue-700 text-xl border-2 border-gray-200" value="${currentScore}" placeholder="-">
-                    <!-- 🚀 แก้ไข: ใช้ data-attributes แทนการส่งค่าตรงๆ ใน onclick ป้องกันบักเครื่องหมายคำพูด -->
                     <button data-class="${classroom}" data-number="${std.number}" data-name="${std.name}" data-assignment="${assignment}" onclick="saveScore(this)" class="btn-tactile bg-blue-600 hover:bg-blue-700 text-white px-6 py-3.5 rounded-xl text-base font-bold shadow-sm min-w-[100px]">
                       บันทึก
                     </button>
@@ -281,16 +292,19 @@
 
           tbody.innerHTML = rowsHTML; 
           showToast(`✅ โหลดข้อมูลสำเร็จแล้วครับ!`);
+        } else {
+          tbody.innerHTML = `<tr><td colspan="5" class="text-center py-12 text-amber-600 font-bold text-xl">⚠️ ${result?.error || 'เกิดข้อผิดพลาดในการโหลดข้อมูล'}</td></tr>`;
+          showToast(`❌ ${result?.error || 'โหลดข้อมูลไม่สำเร็จ'}`, true);
         }
       } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-12 text-red-500 font-bold text-xl">❌ เกิดข้อผิดพลาด กรุณารีเฟรช</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-12 text-red-500 font-bold text-xl">❌ เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง</td></tr>`;
+        showToast('❌ ไม่สามารถดึงข้อมูลจากเซิร์ฟเวอร์ได้', true);
       } finally {
         fetchBtn.disabled = false;
         fetchBtn.innerText = '🔍 ดึงตารางตรวจงาน';
       }
     }
 
-    // 🚀 เปลี่ยนวิธีรับค่า เพื่อดึงจากปุ่มที่กดโดยตรง ป้องกันบั๊ก
     async function saveScore(btn) {
       const classroom = btn.getAttribute('data-class');
       const number = btn.getAttribute('data-number');
@@ -313,11 +327,23 @@
       try {
         const response = await fetch(SCRIPT_URL, {
           method: 'POST',
-          body: JSON.stringify({ action: 'updateScore', classroom: classroom, number: number, name: name, assignment: assignment, score: score })
+          headers: {
+            'Content-Type': 'text/plain;charset=utf-8'
+          },
+          body: JSON.stringify({ 
+            action: 'updateScore', 
+            classroom: classroom, 
+            number: number, 
+            name: name, 
+            assignment: assignment, 
+            score: score 
+          })
         });
         
+        if (!response.ok) throw new Error('Network error');
+        
         const result = await response.json();
-        if(result.isOk) {
+        if(result && result.isOk) {
           showToast(`🎉 บันทึกคะแนนเลขที่ ${number} สำเร็จ!`);
           btn.classList.replace('bg-blue-600', 'bg-emerald-500');
           btn.classList.replace('hover:bg-blue-700', 'hover:bg-emerald-600');
@@ -330,7 +356,7 @@
             btn.classList.remove('opacity-80');
           }, 1500);
         } else {
-          showToast('❌ บันทึกไม่สำเร็จ: ' + result.error, true);
+          showToast('❌ บันทึกไม่สำเร็จ: ' + (result?.error || 'เกิดข้อผิดพลาด'), true);
           btn.innerText = originalText; btn.disabled = false; btn.classList.remove('opacity-80');
         }
       } catch (e) {

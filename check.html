@@ -113,39 +113,22 @@
 </head>
 <body class="min-h-screen text-gray-800">
 
-  <!-- แถบปุ่มควบคุม สไตล์ iOS Progressive Blur Fade & Liquid Glass Buttons -->
+  <!-- แถบปุ่มควบคุม -->
   <div class="fixed top-0 inset-x-0 z-[150] h-20 pointer-events-none select-none">
-    
-    <!-- Multi-Layer Progressive Blur Mask Background -->
     <div class="absolute inset-0 bg-gradient-to-b from-[#EEF2F6]/90 via-[#EEF2F6]/50 to-transparent backdrop-blur-[24px] backdrop-saturate-[180%]" 
-         style="-webkit-mask-image: linear-gradient(to bottom, 
-                    rgba(0,0,0,1) 0%, 
-                    rgba(0,0,0,0.85) 40%, 
-                    rgba(0,0,0,0.3) 75%, 
-                    rgba(0,0,0,0) 100%);
-                mask-image: linear-gradient(to bottom, 
-                    rgba(0,0,0,1) 0%, 
-                    rgba(0,0,0,0.85) 40%, 
-                    rgba(0,0,0,0.3) 75%, 
-                    rgba(0,0,0,0) 100%);">
+         style="-webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.85) 40%, rgba(0,0,0,0.3) 75%, rgba(0,0,0,0) 100%);">
     </div>
-
-    <!-- เลเยอร์ปุ่มกด Liquid Glass Style ทั้งหมด -->
     <nav id="back-nav" class="relative z-10 pt-4 px-5 max-w-lg mx-auto flex items-center justify-between transition-all pointer-events-auto">
-      
-      <!-- 1. ปุ่มย้อนกลับ (Liquid Glass) -->
       <button onclick="goBack()" class="ios-liquid-glass btn-tactile flex items-center justify-center w-10 h-10 rounded-full shadow-sm cursor-pointer transition-transform active:scale-95" title="ย้อนกลับ">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
           <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
         </svg>
       </button>
 
-      <!-- 2. ปุ่มประกาศงานค้าง / ส่งงานครบ (Liquid Glass) -->
+      <!-- ปุ่มประกาศสอบแก้ -->
       <button id="missing-btn" onclick="toggleMissingModal()" class="hidden ios-liquid-glass btn-tactile px-4 h-10 rounded-full font-bold text-[13px] flex items-center gap-2 cursor-pointer shadow-sm transition-transform active:scale-95">
-        <!-- ข้อมูลจะถูก render จาก JS -->
       </button>
 
-      <!-- 3. ปุ่มเล่นเกมส์ (Liquid Glass) -->
       <a id="gameButton" onclick="goToGame()" class="hidden ios-liquid-glass btn-tactile flex items-center justify-center w-10 h-10 rounded-full shadow-sm cursor-pointer transition-transform active:scale-95" title="เล่นเกมส์">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
           <rect width="20" height="12" x="2" y="6" rx="2"/>
@@ -155,65 +138,48 @@
           <path d="M18 11h.01"/>
         </svg>
       </a>
-
     </nav>
   </div>
 
-  <!-- Modal รายการที่ต้องดำเนินการ (งานค้าง) -->
+  <!-- Modal สอบแก้ (เฉพาะ Exam) -->
   <div id="missing-modal-overlay" class="fixed inset-0 z-[200] hidden modal-overlay opacity-0 flex items-center justify-center px-5" onclick="toggleMissingModal()">
     <div id="missing-modal-content" class="ios-liquid-glass w-full max-w-[26rem] rounded-[2rem] p-6 modal-enter relative overflow-hidden shadow-2xl" onclick="event.stopPropagation()">
       <div class="absolute top-3 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-[#293B86]/20 rounded-full"></div>
       <div class="mt-4 mb-4 text-center">
         <h3 style="font-family: 'Itim', cursive; text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;" class="text-[28px] sm:text-[32px] font-bold text-[#293B86] drop-shadow-sm tracking-tight leading-tight">
-  รายการที่ต้องดำเนินการ
-</h3>
+          การทดสอบที่ต้องแก้
+        </h3>
         <p class="text-xs text-[#293B86]/80 font-medium mt-1">คลิกที่พื้นที่ว่างรอบๆ เพื่อปิดหน้าต่างนี้</p>
       </div>
       <div id="missing-list-container" class="space-y-3 max-h-[55vh] overflow-y-auto pr-1 pb-4 scrollbar-hide"></div>
     </div>
   </div>
 
-  <!-- Modal / หน้าต่างใหม่สำหรับดูข้อมูลงานและคะแนน (สไลด์จากขวา) -->
+  <!-- หน้าสไลด์คะแนนพิเศษ -->
   <div id="hw-page-overlay" class="fixed inset-0 z-[180] bg-[#EEF2F6] flex flex-col page-slide translate-x-full hidden">
-    
-    <!-- แถบด้านบน สไตล์ iOS Progressive Blur Fade -->
     <div class="fixed top-0 inset-x-0 z-[190] h-20 pointer-events-none select-none">
       <div class="absolute inset-0 bg-gradient-to-b from-[#EEF2F6]/90 via-[#EEF2F6]/50 to-transparent backdrop-blur-[24px] backdrop-saturate-[180%]" 
-           style="-webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.85) 40%, rgba(0,0,0,0.3) 75%, rgba(0,0,0,0) 100%);
-                  mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.85) 40%, rgba(0,0,0,0.3) 75%, rgba(0,0,0,0) 100%);">
+           style="-webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.85) 40%, rgba(0,0,0,0.3) 75%, rgba(0,0,0,0) 100%);">
       </div>
-
-      <!-- เลเยอร์ Nav Bar ด้านบน -->
       <nav class="relative z-10 pt-4 px-5 max-w-lg mx-auto w-full flex items-center justify-between pointer-events-auto">
-        <!-- ปุ่มย้อนกลับ (Liquid Glass) -->
         <button onclick="toggleHwPage()" class="ios-liquid-glass btn-tactile flex items-center justify-center w-10 h-10 rounded-full shadow-sm cursor-pointer transition-transform active:scale-95" title="ย้อนกลับ">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
           </svg>
         </button>
-
-        <!-- หัวข้อกลางหน้า (Itim Font + White Stroke Effect) -->
-<h2 style="font-family: 'Itim', cursive; text-shadow: -1.5px -1.5px 0 #fff, 1.5px -1.5px 0 #fff, -1.5px 1.5px 0 #fff, 1.5px 1.5px 0 #fff;" class="font-bold text-[#293B86] text-xl tracking-wide drop-shadow-sm">
-  คะแนนพิเศษ
-</h2>
-        
-        <!-- ตัวเว้นระยะเพื่อให้หัวข้ออยู่ตรงกลางพอดี -->
+        <h2 style="font-family: 'Itim', cursive; text-shadow: -1.5px -1.5px 0 #fff, 1.5px -1.5px 0 #fff, -1.5px 1.5px 0 #fff, 1.5px 1.5px 0 #fff;" class="font-bold text-[#293B86] text-xl tracking-wide drop-shadow-sm">คะแนนพิเศษ</h2>
         <div class="w-10"></div>
       </nav>
     </div>
-
-    <!-- รายการการ์ดชิ้นงาน (เว้น pt-20 เพื่อไม่ให้เนื้อหาถูกแถบเบลอทับ) -->
     <main class="flex-1 overflow-y-auto px-5 pt-20 pb-10 w-full max-w-lg mx-auto">
       <div id="homework-list" class="grid grid-cols-2 gap-3 mt-4 pb-10"></div>
     </main>
   </div>
 
-  <!-- เพิ่ม pt-24 (96px) เพื่อดันเนื้อหาลงมาไม่ให้ถูกปุ่มที่ฟิกซ์ไว้ทับ -->
   <header class="pt-24 pb-6 px-5 max-w-lg mx-auto text-center space-y-2 relative z-10">
-    <!-- ปรับขนาดฟอนต์หัวข้อใหญ่ให้โตขึ้น (text-3xl sm:text-4xl) -->
-<h1 style="font-family: 'Itim', cursive; text-shadow: -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff, 2px 2px 0 #fff, 0 3px 0 #fff, 0 -3px 0 #fff, 3px 0 0 #fff, -3px 0 0 #fff;" class="text-5xl sm:text-5xl font-bold text-[#293B86] tracking-tight drop-shadow-md">
-  ระบบตรวจสอบคะแนน
-</h1>
+    <h1 style="font-family: 'Itim', cursive; text-shadow: -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff, 2px 2px 0 #fff, 0 3px 0 #fff, 0 -3px 0 #fff, 3px 0 0 #fff, -3px 0 0 #fff;" class="text-5xl sm:text-5xl font-bold text-[#293B86] tracking-tight drop-shadow-md">
+      ระบบตรวจสอบคะแนน
+    </h1>
     <p class="text-xs text-blue-600 bg-white px-4 py-1.5 rounded-full font-medium shadow-sm inline-block border border-blue-50/50">ตรวจสอบคะแนน และสถานะงาน</p>
   </header>
 
@@ -227,7 +193,6 @@
           <div class="h-12 bg-gray-200 rounded-xl w-full mt-6"></div>
         </div>
       </div>
-
       <div class="space-y-4 relative z-0">
         <div>
           <label class="block text-xs font-semibold mb-1.5 text-gray-500 uppercase tracking-wide">1. เลือกห้องเรียน</label>
@@ -270,22 +235,22 @@
       
       <div id="exam-container" class="space-y-3"></div>
 
-      <!-- ปุ่มเข้าสู่หน้าดูคะแนนชิ้นงานทั้งหมด (Liquid Glass Version - Center Aligned) -->
+      <!-- ปุ่มเข้าสู่หน้าข้อมูลการส่งงานพิเศษ -->
       <div class="w-full relative group overflow-hidden rounded-[1.5rem] p-5 border border-white/60 bg-white/40 backdrop-blur-xl shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] hover:shadow-[0_12px_40px_0_rgba(31,38,135,0.12)] hover:bg-white/50 hover:border-white/80 transition-all duration-300 hover:scale-[1.01] active:scale-[0.98] cursor-pointer mt-4 fade-in-up" style="animation-delay: 200ms;" onclick="toggleHwPage()">
-        
-        <!-- แสงสะท้อนผิวกระจก (Liquid Reflection) -->
         <div class="absolute inset-0 bg-gradient-to-br from-white/60 via-transparent to-transparent opacity-80 pointer-events-none"></div>
         <div class="absolute -top-[100%] left-0 w-full h-[200%] bg-gradient-to-r from-transparent via-white/30 to-transparent transform -skew-x-12 group-hover:translate-x-full transition-transform duration-1000 ease-out pointer-events-none"></div>
-
         <div class="relative z-10 flex items-center justify-center text-center">
           <div>
             <h3 style="font-family: 'Itim', cursive; text-shadow: -1.5px -1.5px 0 #fff, 1.5px -1.5px 0 #fff, -1.5px 1.5px 0 #fff, 1.5px 1.5px 0 #fff;" class="font-bold text-[#293B86] text-[30px] sm:text-[24px] leading-tight">
-  ข้อมูลการส่งงาน
-</h3>
-            <p class="text-[11px] text-gray-500/90 mt-1 font-medium">คลิกเพื่อดูรายละเอียดคะแนนและสถานะ</p>
+              ข้อมูลการส่งงาน
+            </h3>
+            <p class="text-[11px] text-gray-500/90 mt-1 font-medium">คลิกเพื่อดูรายละเอียดคะแนนพิเศษและสถานะ</p>
           </div>
         </div>
       </div>
+
+      <!-- 📌 การแสดงรายการชีทที่นักเรียนยังขาดส่ง และ Error แจ้งเตือน -->
+      <div id="missing-worksheets-container" class="hidden flex-col gap-3 mt-6"></div>
       
     </div>
   </main>
@@ -293,7 +258,8 @@
   <div id="toast" class="fixed top-12 left-1/2 -translate-x-1/2 bg-gray-900/95 backdrop-blur-sm text-white px-6 py-3.5 rounded-2xl shadow-2xl hidden text-sm font-medium z-[300] text-center max-w-[90%] w-max transition-all duration-300 border border-gray-800"></div>
 
   <script>
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwhiMY58FFTk4g8Ern1jkWKtTNXcfJJXWmh0a2rdjuc4o6kSzyR50STNEQK2lz2nGrGKw/exec';
+    // 📌 อย่าลืมตรวจสอบว่าลิงก์ SCRIPT_URL นี้ตรงกับที่ Deploy ไว้ล่าสุด
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxjQ5Ugt8tUDCgpt6HCif73NOBEIjklJ5PVhDBbQkVWSncLiz50N8n2alBHxe88_nRbkw/exec';
     
     let allStudents = [];
     let allAssignments = [];
@@ -455,13 +421,13 @@
       }
     }
 
-    function renderMissingWork(missingData) {
+    // เรนเดอร์ป๊อปอัพ (เฉพาะงานแก้สอบ)
+    function renderMissingWork(allMissing, examMissing) {
       const btn = document.getElementById('missing-btn');
       const container = document.getElementById('missing-list-container');
       
-      btn.classList.remove('hidden');
-      
-      if (!missingData || missingData.length === 0) {
+      if (allMissing.length === 0) {
+        btn.classList.remove('hidden');
         btn.innerHTML = `
           <span class="relative flex h-2.5 w-2.5">
             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
@@ -473,30 +439,31 @@
         return;
       }
 
-      btn.innerHTML = `
-        <span class="relative flex h-2.5 w-2.5">
-          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-          <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
-        </span>
-        ประกาศงาน <span id="missing-count" class="bg-white/70 px-1.5 rounded-md text-xs font-black drop-shadow-sm text-[#293B86]">${missingData.length}</span>
-      `;
-      btn.onclick = toggleMissingModal;
-
-      container.innerHTML = missingData.map((item, index) => {
-        let isExam = item.type === 'exam';
-        let icon = isExam ? '🚨' : '📝';
-        let colorClass = isExam ? 'text-red-600 bg-red-100/50 border-red-200/50' : 'text-amber-600 bg-amber-100/50 border-amber-200/50';
-        
-        return `
-          <div class="flex items-center gap-3 p-3.5 bg-white/60 backdrop-blur-md rounded-2xl border border-white shadow-sm fade-in-up" style="animation-delay: ${index * 50}ms;">
-            <div class="w-10 h-10 shrink-0 rounded-full flex items-center justify-center text-lg ${colorClass} font-bold">${icon}</div>
-            <div class="flex-1">
-              <h4 class="text-[14px] font-bold text-[#293B86] leading-tight">${item.name}</h4>
-              <p class="text-[11px] text-gray-500 font-medium mt-0.5">${item.msg}</p>
-            </div>
-          </div>
+      if (examMissing.length > 0) {
+        btn.classList.remove('hidden');
+        btn.innerHTML = `
+          <span class="relative flex h-2.5 w-2.5">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+          </span>
+          สอบแก้ <span id="missing-count" class="bg-white/70 px-1.5 rounded-md text-xs font-black drop-shadow-sm text-[#293B86]">${examMissing.length}</span>
         `;
-      }).join('');
+        btn.onclick = toggleMissingModal;
+
+        container.innerHTML = examMissing.map((item, index) => {
+          return `
+            <div class="flex items-center gap-3 p-3.5 bg-white/60 backdrop-blur-md rounded-2xl border border-white shadow-sm fade-in-up" style="animation-delay: ${index * 50}ms;">
+              <div class="w-10 h-10 shrink-0 rounded-full flex items-center justify-center text-lg text-red-600 bg-red-100/50 border-red-200/50 font-bold">🚨</div>
+              <div class="flex-1">
+                <h4 class="text-[14px] font-bold text-[#293B86] leading-tight">${item.name}</h4>
+                <p class="text-[11px] text-gray-500 font-medium mt-0.5">${item.msg}</p>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } else {
+        btn.classList.add('hidden');
+      }
     }
 
     function generateExamCardHTML(title, scoreRaw, badgeText, delayMs) {
@@ -616,7 +583,7 @@
         let result = await res.json();
 
         if(result.isOk) {
-          
+   
           const studentInfo = {
             name: student.name,
             number: student.number,
@@ -645,65 +612,102 @@
             : computedTotalScore.toFixed(1).replace('.0', '');
           document.getElementById('res-hw-score').innerText = formattedTotalScore;
 
-          let missingList = [];
-          const classAssignments = allAssignments.filter(a => a.classroom === student.classroom);
-          const requiredHw = classAssignments.map(a => a.name);
+          // ===============================================
+          // จัดการแสดงข้อมูล Error และ ชีทที่ค้างส่ง ด้านล่าง
+          // ===============================================
+          let allMissing = result.missingWork || [];
+          let examMissing = allMissing.filter(w => w.type === 'exam'); // ค้างสอบ ไปอยู่ด้านบนป๊อปอัพ
+          let hwMissing = allMissing.filter(w => w.type === 'hw');     // ค้างชีท และข้อความแจ้งเตือนบัค ไปอยู่ด้านล่าง
 
-          let submittedHwNames = [];
-          if (result.data && Array.isArray(result.data)) {
-            submittedHwNames = result.data
-              .filter(h => h.score !== undefined && h.score !== null && h.score.toString().trim() !== '')
-              .map(h => h.assignment.toString().trim());
-          }
+          renderMissingWork(allMissing, examMissing);
 
-          requiredHw.forEach(hwName => {
-            if (!submittedHwNames.includes(hwName.trim())) {
-              const allowedKeywords = ["ชีท", "ใบกิจกรรม", "นักสืบความสูง"];
-              const isAllowed = allowedKeywords.some(keyword => hwName.includes(keyword));
-              
-              if (isAllowed) {
-                missingList.push({ name: hwName, type: 'hw', msg: 'กรุณาส่งงานเพื่อรับคะแนน' });
-              }
-            }
-          });
+          
+            // ===============================================
+          // จัดการแสดงข้อมูล งานค้าง ด้านล่างสุด
+          // ===============================================
+          const hwContainer = document.getElementById('missing-worksheets-container');
+hwContainer.classList.remove('hidden');
+hwContainer.classList.add('flex', 'flex-col', 'gap-3'); // จัดระยะห่างระหว่างการ์ด
 
-          const checkExamStatus = (scoreRaw, threshold, examName) => {
-            if (scoreRaw !== undefined && scoreRaw !== null && scoreRaw !== "") {
-              let parsed = parseFloat(scoreRaw);
-              if (!isNaN(parsed) && parsed < threshold) {
-                missingList.push({ name: examName, type: 'exam', msg: 'ขาดงานแก้ (คะแนนไม่ผ่านเกณฑ์)' });
-              }
-            }
-          };
+if (hwMissing.length > 0) {
+  let hwHtml = `
+    <div class="flex items-center gap-2 mb-1 pl-1 fade-in-up">
+      <div class="bg-red-500 text-white p-1 rounded-md animate-bounce">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+        </svg>
+      </div>
+      <h3 style="font-family: 'Itim', cursive;" class="text-xl font-bold text-red-600 tracking-wide">แจ้งเตือน : งานค้าง</h3>
+    </div>
+  `;
+  
+  hwHtml += hwMissing.map((item, index) => {
+    let isWarn = item.name.includes('⚠️');
+    return `
+      <div class="card-hover ${isWarn ? 'bg-orange-50 border-orange-300' : 'bg-red-50 border-red-300'} border-2 p-4 rounded-2xl shadow-md flex items-center justify-between fade-in-up relative overflow-hidden">
+        <!-- แถบสีสดด้านข้าง -->
+        <div class="absolute top-0 left-0 w-2.5 h-full ${isWarn ? 'bg-orange-500' : 'bg-red-600'}"></div>
+        
+        <!-- ข้อความเตือนแบบเด่นเน้นๆ -->
+        <div class="pl-3 flex-1">
+          <h4 class="text-base font-extrabold ${isWarn ? 'text-orange-900' : 'text-red-950'} leading-snug">
+            ${item.name}
+          </h4>
+          <p class="text-xs ${isWarn ? 'text-orange-700 font-bold' : 'text-red-600 font-bold'} mt-1 flex items-center gap-1">
+            <span class="inline-block w-2 h-2 rounded-full ${isWarn ? 'bg-orange-500' : 'bg-red-500'} animate-ping"></span>
+             ${item.msg} (กรุณารีบส่งครูโดยด่วน)
+          </p>
+        </div>
 
-          checkExamStatus(result.exam1Score, 6, "สอบบทที่ 1");
-          checkExamStatus(result.exam2Score, 6, "สอบบทที่ 2");
-          checkExamStatus(result.exam3Score, 6, "สอบบทที่ 3");
-          checkExamStatus(result.exam4Score, 6, "สอบบทที่ 4");
-          checkExamStatus(result.exam5Score, 6, "สอบบทที่ 5");
-          checkExamStatus(result.exam6Score, 6, "สอบบทที่ 6");
-          checkExamStatus(result.midtermScore, 9, "สอบกลางภาค");
+        <!-- ป้ายกำกับสถานะ -->
+        <div class="shrink-0 ml-2">
+          <span class="px-3 py-1 text-xs font-black rounded-full shadow-sm ${isWarn ? 'bg-orange-200 text-orange-800' : 'bg-red-200 text-red-800'} border ${isWarn ? 'border-orange-300' : 'border-red-300'}">
+            ยังไม่ได้ส่ง
+          </span>
+        </div>
+      </div>
+    `;
+  }).join('');
 
-          renderMissingWork(missingList);
+  hwContainer.innerHTML = hwHtml;
+} else {
+  // กรณีไม่มีงานค้าง
+  hwContainer.innerHTML = `
+    <div class="card-hover bg-green-50 border-2 border-green-300 p-4 rounded-2xl shadow-sm flex items-center justify-between fade-in-up">
+      <div class="pl-2">
+        <h4 class="text-base font-bold text-green-800 leading-tight">🎉 ดีมาก! ไม่มียอดงานค้างส่ง</h4>
+        <p class="text-xs text-green-600 font-medium mt-0.5">นักเรียนส่งชีทประกอบการเรียนครบถ้วนเรียบร้อยแล้ว</p>
+      </div>
+      <span class="px-3 py-1 text-xs font-bold rounded-full bg-green-200 text-green-800 border border-green-300">
+        สมบูรณ์
+      </span>
+    </div>
+  `;
+}
 
+          // เรนเดอร์การ์ดสอบ
           const examContainer = document.getElementById('exam-container');
           let title1 = result.exam1Title || "คะแนนสอบบทที่ 1";
           let title2and3 = (result.exam2Title && result.exam2Title !== "สอบบทที่ 2") ? result.exam2Title : "คะแนนสอบบทที่ 2 และ 3";
           let title4 = result.exam4Title || "คะแนนสอบบทที่ 4";
+          let titleS = result.examSTitle || "คะแนนสอบบทที่ 5";
 
           examContainer.innerHTML = 
             generateExamCardHTML(title1, result.exam1Score, 'บทที่ 1', 40) +
             generateExamCardHTML(title2and3, result.exam2Score, 'บทที่ 2 และ 3', 70) +
             generateMidtermCardHTML('คะแนนสอบกลางภาค', result.midtermScore, 100) +
-            generateExamCardHTML(title4, result.exam4Score, 'บทที่ 4', 130);
+            generateExamCardHTML(title4, result.exam4Score, 'บทที่ 4', 130) +
+            generateExamCardHTML(titleS, result.columnSData, 'บทที่ 5', 160);
 
-          const hwContainer = document.getElementById('homework-list');
+          // เรนเดอร์คะแนนพิเศษในหน้าสไลด์
+          const hwPageContainer = document.getElementById('homework-list');
+          const classAssignments = allAssignments.filter(a => a.classroom === student.classroom);
 
           if(classAssignments.length === 0) {
-            hwContainer.className = "block mt-2";
-            hwContainer.innerHTML = `<div class="bg-white p-6 rounded-[1.5rem] shadow-sm border border-gray-50 text-center text-[13px] text-gray-400">ยังไม่มีการมอบหมายชิ้นงานในระบบ</div>`;
+            hwPageContainer.className = "block mt-2";
+            hwPageContainer.innerHTML = `<div class="bg-white p-6 rounded-[1.5rem] shadow-sm border border-gray-50 text-center text-[13px] text-gray-400">ยังไม่มีการมอบหมายคะแนนพิเศษในระบบ</div>`;
           } else {
-            hwContainer.className = "grid grid-cols-2 gap-3 mt-4 pb-10";
+            hwPageContainer.className = "grid grid-cols-2 gap-3 mt-4 pb-10";
             
             const fullReportData = classAssignments.map(asg => {
               const matchSub = result.data ? result.data.find(sub => (sub.assignment || '').toString().trim() === asg.name.toString().trim()) : null;
@@ -744,7 +748,7 @@
               return datePart;
             };
 
-            hwContainer.innerHTML = fullReportData.map((h, index) => {
+            hwPageContainer.innerHTML = fullReportData.map((h, index) => {
               let statusText, statusColor, scoreBox, dotColor;
               let displayDate = formatThaiDate(h.submittedDate);
               

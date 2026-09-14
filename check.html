@@ -683,20 +683,20 @@ if (hwMissing.length > 0) {
   }).join('');
 
   hwContainer.innerHTML = hwHtml;
-        } else {
-          // กรณีไม่มีงานค้าง
-          hwContainer.innerHTML = `
-            <div style="font-family: 'Itim', cursive;" class="card-hover bg-green-50 border-2 border-green-300 p-4 rounded-2xl shadow-sm flex items-center justify-between fade-in-up">
-              <div class="pl-2">
-                <h4 class="text-base font-bold text-green-800 leading-tight">🎉 ดีมาก! ไม่มีงานค้างส่ง</h4>
-                <p class="text-xs text-green-600 font-medium mt-0.5">นักเรียนส่งชีทประกอบการเรียนครบถ้วนเรียบร้อยแล้ว</p>
-              </div>
-              <span class="px-3 py-1 text-xs font-bold rounded-full bg-green-200 text-green-800 border border-green-300">
-                ส่งงานครบแล้ว
-              </span>
-            </div>
-          `;
-        }
+  } else {
+    // กรณีไม่มีงานค้าง
+    hwContainer.innerHTML = `
+      <div style="font-family: 'Itim', cursive;" class="card-hover bg-green-50 border-2 border-green-300 p-3.5 rounded-2xl shadow-sm flex items-center justify-between gap-2 fade-in-up">
+        <div class="flex-1 min-w-0">
+          <h4 class="text-sm sm:text-base font-bold text-green-800 leading-tight whitespace-nowrap">🎉 ดีมาก! ไม่มีงานค้างส่ง</h4>
+          <p class="text-[11px] sm:text-xs text-green-600 font-medium mt-0.5 whitespace-nowrap">นักเรียนส่งชีทประกอบการเรียนครบถ้วนเรียบร้อยแล้ว</p>
+        </div>
+        <span class="shrink-0 px-2.5 py-1 text-xs font-bold rounded-full bg-green-200 text-green-800 border border-green-300 whitespace-nowrap">
+          ส่งงานครบแล้ว
+        </span>
+      </div>
+    `;
+  }
 
           // เรนเดอร์การ์ดสอบ
           const examContainer = document.getElementById('exam-container');

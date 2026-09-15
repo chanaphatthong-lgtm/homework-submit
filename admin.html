@@ -2,150 +2,234 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>ระบบตรวจงานแอดมิน - ครูเกมส์</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Itim&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
   
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   
   <style>
     * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+    
     html, body { 
       overflow-x: hidden; 
-      font-family: 'DM Sans', sans-serif; 
+      font-family: 'Prompt', sans-serif; 
+      /* พื้นหลังแบบ Liquid / Ambient */
+      background-color: #f4f7fa; 
       -webkit-font-smoothing: antialiased; 
-      -moz-osx-font-smoothing: grayscale;
       scroll-behavior: smooth; 
-      -webkit-text-size-adjust: 100%;
+      padding-bottom: env(safe-area-inset-bottom);
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
+    }
+
+    /* วงกลมตกแต่งพื้นหลังให้ดูเป็น Liquid/Glass */
+    .bg-blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      z-index: -1;
+      opacity: 0.6;
+      animation: float 15s infinite ease-in-out alternate;
+    }
+    .blob-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: #e0e7ff; }
+    .blob-2 { bottom: -10%; right: -10%; width: 60vw; height: 60vw; background: #dbeafe; animation-delay: -5s; }
+    .blob-3 { top: 40%; left: 40%; width: 40vw; height: 40vw; background: #f3e8ff; animation-delay: -10s; }
+
+    @keyframes float {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(10%, 15%) scale(1.1); }
+    }
+
+    .font-itim {
+      font-family: 'Itim', cursive, sans-serif;
     }
     
+    /* สไตล์หัวข้อปรับให้เข้ากับกระจก */
+    .title-glass {
+      color: #1e3a8a;
+      text-shadow: 0 4px 15px rgba(30, 58, 138, 0.15);
+      letter-spacing: 0.5px;
+    }
+    
+    /* 💎 Liquid Glass Card */
     .hw-card { 
-      background: rgba(255,255,255,0.95); 
-      border: 1px solid rgba(0,0,0,0.04); 
-      border-radius: 24px; 
-      box-shadow: 0 4px 20px rgba(30,64,175,0.05); 
+      background: rgba(255, 255, 255, 0.6); 
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-radius: 32px; 
+      box-shadow: 
+        0 20px 40px -10px rgba(0, 0, 0, 0.05), 
+        inset 0 1px 0 rgba(255, 255, 255, 0.8),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.7);
     }
     
+    /* 💎 Glass Inputs */
     .hw-input { 
-      background: rgba(118,118,128,0.06); 
-      border: 2px solid transparent; 
-      border-radius: 14px; 
-      padding: 16px 20px; 
+      background: rgba(255, 255, 255, 0.5); 
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.8); 
+      box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.02);
+      border-radius: 20px; 
+      padding: 14px 20px; 
       font-size: 16px; 
       width: 100%; 
-      transition: background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease; 
+      color: #334155;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 1.25rem center;
+      background-size: 1.2em 1.2em;
     }
+    @media (min-width: 768px) { .hw-input { font-size: 18px; padding: 18px 24px; } }
+    
     .hw-input:focus { 
-      background: #ffffff; 
-      border-color: #3b82f6; 
-      box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15); 
+      background: rgba(255, 255, 255, 0.9); 
+      border-color: #818cf8; 
+      box-shadow: 0 0 0 4px rgba(129, 140, 248, 0.15), inset 0 2px 5px rgba(0,0,0,0.02); 
       outline: none; 
+      transform: translateY(-1px);
     }
     
-    .btn-tactile { 
-      transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), filter 0.2s ease, background-color 0.2s ease;
-      will-change: transform;
-      transform: translateZ(0); 
+    /* 💎 Glass/Premium Button */
+    .btn-primary { 
+      background: linear-gradient(135deg, #2c3377 0%, #3730a3 100%);
+      color: #ffffff;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 10px 25px -5px rgba(44, 51, 119, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
-    .btn-tactile:active { transform: scale(0.95) translateY(2px) translateZ(0); }
-    .btn-tactile:hover { filter: brightness(1.05); }
-    .btn-tactile:disabled { transform: none; filter: none; opacity: 0.7; cursor: not-allowed; }
+    .btn-primary:active { transform: scale(0.95) translateY(2px); }
+    .btn-primary:hover { 
+      background: linear-gradient(135deg, #3730a3 0%, #4338ca 100%);
+      box-shadow: 0 15px 30px -5px rgba(44, 51, 119, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3); 
+      transform: translateY(-2px);
+    }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; filter: grayscale(50%); }
     
+    /* Image Preview */
     .img-preview {
-        width: 90px;
-        height: 90px;
-        object-fit: cover;
-        border-radius: 14px;
-        border: 2px solid #e5e7eb;
-        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease, border-color 0.3s ease;
-        will-change: transform, box-shadow;
-        transform: translateZ(0);
-        backface-visibility: hidden; 
-        cursor: pointer;
+      width: 80px; height: 80px;
+      object-fit: cover;
+      border-radius: 18px;
+      border: 2px solid rgba(255, 255, 255, 0.8);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      cursor: pointer;
     }
-    .img-preview:hover, .img-preview:active {
-        transform: scale(3.5) translateZ(0);
-        z-index: 50;
-        position: relative;
-        box-shadow: 0 12px 25px -5px rgba(0, 0, 0, 0.4);
-        border-color: #3b82f6;
+    @media (min-width: 768px) { .img-preview { width: 100px; height: 100px; } }
+    
+    @media (hover: hover) {
+      .img-preview:hover {
+        transform: scale(3) translateZ(0);
+        z-index: 50; position: relative;
+        box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.2);
+        border-color: #fff;
+      }
     }
     
-    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    /* Scrollbar สำหรับ Glass UI */
+    ::-webkit-scrollbar { width: 8px; height: 10px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.5); border-radius: 10px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(107, 114, 128, 0.8); }
+    ::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.3); border-radius: 20px; border: 2px solid transparent; background-clip: padding-box; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.6); border: 2px solid transparent; background-clip: padding-box; }
     
+    /* 💎 iOS Dynamic Island Toast */
+    #toast {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    }
     .toast-animate {
       will-change: transform, opacity;
-      transform: translate(-50%, -20px) scale(0.95) translateZ(0);
+      transform: translate(-50%, -30px) scale(0.9);
       opacity: 0;
-      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.35s ease;
+      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
       pointer-events: none;
     }
     .toast-visible {
-      transform: translate(-50%, 0) scale(1) translateZ(0);
+      transform: translate(-50%, 0) scale(1);
       opacity: 1;
     }
   </style>
 </head>
-<body class="min-h-screen bg-[#E6F2FB] text-gray-800 pb-10">
+<body class="min-h-screen pb-12 relative">
   
-  <header class="pt-10 pb-8 px-6 max-w-7xl mx-auto flex flex-col items-center text-center gap-0 relative z-10">
-    <img src="เกมส์_01.png" alt="โลโก้ครูเกมส์" fetchpriority="high" class="w-36 h-36 object-cover drop-shadow-md mb-3" onerror="this.style.display='none'">
-    <h1 class="font-bold text-4xl leading-tight text-gray-900 drop-shadow-sm mb-2">ตรวจงานครูเกมส์</h1>
-    <p class="text-base mt-1 text-white bg-blue-800 px-6 py-2 rounded-full inline-block font-semibold shadow-md transform translateZ(0)">แผงควบคุมแอดมิน (Admin Panel)</p>
+  <!-- พื้นหลัง Liquid Background -->
+  <div class="bg-blob blob-1"></div>
+  <div class="bg-blob blob-2"></div>
+  <div class="bg-blob blob-3"></div>
+  <!-- เอฟเฟกต์เฟดด้านบนสุดของจอ -->
+<div class="fixed top-0 left-0 w-full h-24 md:h-32 bg-gradient-to-b from-[#f4f7fa] via-[#f4f7fa]/80 to-transparent z-[45] pointer-events-none"></div>
+  <header class="pt-10 md:pt-14 pb-6 md:pb-10 px-4 w-full max-w-[1600px] mx-auto flex flex-col items-center text-center gap-2 relative z-10">
+    <h1 class="font-itim title-glass font-bold text-5xl sm:text-6xl md:text-7xl mb-2 leading-tight">ระบบตรวจงานแอดมิน</h1>
+    <div class="bg-white/60 backdrop-blur-md text-indigo-600 px-6 py-2 md:px-8 md:py-2.5 rounded-full text-sm sm:text-base md:text-lg font-bold shadow-sm border border-white/80 tracking-wide">
+      แผงควบคุมแอดมิน (Admin Panel)
+    </div>
   </header>
-
-  <main class="max-w-[95%] xl:max-w-7xl mx-auto px-5 space-y-8 relative z-20">
-    <div class="hw-card p-8">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-end">
+  
+  <main class="w-full max-w-[100vw] lg:max-w-[95vw] 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 space-y-8 relative z-20">
+    
+    <div class="hw-card p-6 sm:p-8 md:p-10 relative overflow-visible">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-8 items-end">
         <div>
-          <label class="block text-base font-bold mb-3 text-gray-600 uppercase tracking-wide">เลือกระดับชั้น / ห้อง</label>
-          <select id="selectClass" class="hw-input" onchange="updateAssignmentDropdown()">
-            <option value="">-- กำลังโหลดข้อมูล... --</option>
+          <label class="block text-indigo-900/70 font-bold text-lg md:text-xl mb-2 md:mb-3 ml-2">1. เลือกระดับชั้น / ห้อง</label>
+          <select id="selectClass" class="hw-input font-semibold" onchange="updateAssignmentDropdown()">
+            <option value="">-- เลือกห้องเรียน --</option>
           </select>
         </div>
         <div>
-          <label class="block text-base font-bold mb-3 text-gray-600 uppercase tracking-wide">เลือกชิ้นงาน (แสดงทั้งหมด)</label>
-          <select id="selectAssignment" class="hw-input" disabled>
-            <option value="">-- เลือกห้องก่อน --</option>
+          <label class="block text-indigo-900/70 font-bold text-lg md:text-xl mb-2 md:mb-3 ml-2">2. เลือกชิ้นงาน</label>
+          <select id="selectAssignment" class="hw-input font-semibold" disabled>
+            <option value="">-- กรุณาเลือกห้องเรียนก่อน --</option>
           </select>
         </div>
-        <div>
-          <button id="fetchBtn" onclick="loadAdminTable()" class="btn-tactile w-full bg-blue-700 text-white font-bold text-xl p-4 rounded-xl shadow-md disabled:bg-gray-400 disabled:transform-none">
-            🔍 ดึงตารางตรวจงาน
+        <div class="md:col-span-2 lg:col-span-1 mt-4 md:mt-0">
+          <button id="fetchBtn" onclick="loadAdminTable()" class="btn-primary font-itim w-full text-2xl sm:text-2xl md:text-3xl py-3.5 md:py-4 px-6 h-full min-h-[56px] md:min-h-[64px]">
+            ตรวจสอบชิ้นงาน
           </button>
         </div>
       </div>
     </div>
 
-    <div id="tableContainer" class="hw-card overflow-hidden transition-all duration-300 opacity-0 h-0 pointer-events-none">
-      <div class="overflow-x-auto w-full p-4">
-        <table class="w-full text-left border-collapse min-w-[900px]">
+    <div id="tableContainer" class="hw-card overflow-hidden transition-all duration-500 opacity-0 h-0 pointer-events-none shadow-2xl">
+      <div class="md:hidden text-center text-indigo-600 font-semibold text-sm py-3 bg-white/40 backdrop-blur-sm border-b border-white/50">
+        👉 ปัดซ้าย-ขวาเพื่อดูข้อมูลทั้งหมด
+      </div>
+      
+      <div class="overflow-x-auto w-full p-2 md:p-4">
+        <!-- ปรับความกว้างตารางให้ชิดกันตามที่คุณเคยขอไว้ -->
+        <table class="w-full text-left border-collapse min-w-[700px] md:min-w-[750px]">
           <thead>
-            <tr class="bg-gray-100 text-gray-700 text-base uppercase tracking-wider border-b-2 border-gray-200">
-              <th class="py-5 px-6 font-bold w-[10%] text-center rounded-tl-xl">เลขที่</th>
-              <th class="py-5 px-6 font-bold w-[30%]">ชื่อ - นามสกุล</th>
-              <th class="py-5 px-6 font-bold w-[15%] text-center">สถานะ</th>
-              <th class="py-5 px-6 font-bold w-[20%] text-center">รูปผลงาน</th>
-              <th class="py-5 px-6 font-bold w-[25%] rounded-tr-xl">บันทึกคะแนน</th>
+            <tr class="bg-white/50 backdrop-blur-md text-slate-800 text-lg md:text-2xl border-b-2 border-white/80">
+              <th class="font-itim py-4 md:py-6 px-3 md:px-4 w-[10%] text-center rounded-tl-3xl">เลขที่</th>
+              <th class="font-itim py-4 md:py-6 px-3 md:px-4 w-[30%]">ชื่อ - นามสกุล</th>
+              <th class="font-itim py-4 md:py-6 px-3 md:px-4 w-[20%] text-center">รูปผลงาน</th>
+              <th class="font-itim py-4 md:py-6 px-3 md:px-4 w-[40%] rounded-tr-3xl">บันทึกคะแนน</th>
             </tr>
           </thead>
-          <tbody id="studentTableBody" class="divide-y divide-gray-100 text-lg">
+          <tbody id="studentTableBody" class="divide-y divide-white/50 text-lg md:text-xl text-slate-700 font-medium">
           </tbody>
         </table>
       </div>
     </div>
   </main>
 
-  <div id="toast" class="fixed top-12 left-1/2 bg-gray-900/95 backdrop-blur-md text-white px-8 py-4 rounded-2xl shadow-2xl text-base font-semibold z-50 text-center max-w-[90%] w-max border border-gray-700 toast-animate"></div>
+  <!-- iOS Dynamic Island Toast -->
+  <div id="toast" class="fixed top-12 left-1/2 text-white px-6 py-3 md:px-8 md:py-4 rounded-full text-base md:text-lg font-semibold z-50 text-center max-w-[90%] w-max toast-animate tracking-wide"></div>
 
   <script>
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzYvNUB7ECZBipy-pflP3jkAqKaY0hlLpKsiBawjfPaScPPuIVf8LKVU1KWgFIP5XlRbw/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyz8CGY-Dg7SMhOdYQZ9r_H_dE_egMIW5P1hhl05YaZdqB8DDx8lVw35TcJ3_2Itgbscw/exec';
     let globalData = [];
     let toastTimeout;
 
@@ -170,7 +254,7 @@
       const tableContainer = document.getElementById('tableContainer');
       
       if (!selectedClass) {
-        selectAssignment.innerHTML = '<option value="">-- เลือกห้องก่อน --</option>';
+        selectAssignment.innerHTML = '<option value="">-- กรุณาเลือกห้องเรียนก่อน --</option>';
         selectAssignment.disabled = true;
         hideTable(tableContainer);
         return;
@@ -184,13 +268,13 @@
     }
 
     function hideTable(el) {
-      el.classList.remove('opacity-100', 'h-auto', 'pointer-events-auto');
+      el.classList.remove('opacity-100', 'h-auto', 'pointer-events-auto', 'mt-6');
       el.classList.add('opacity-0', 'h-0', 'pointer-events-none');
     }
     
     function showTable(el) {
       el.classList.remove('opacity-0', 'h-0', 'pointer-events-none');
-      el.classList.add('opacity-100', 'h-auto', 'pointer-events-auto');
+      el.classList.add('opacity-100', 'h-auto', 'pointer-events-auto', 'mt-6');
     }
 
     function showToast(msg, isError = false) {
@@ -198,8 +282,9 @@
       clearTimeout(toastTimeout);
       
       t.textContent = msg; 
-      t.style.backgroundColor = isError ? "rgba(220, 38, 38, 0.95)" : "rgba(17, 24, 39, 0.95)";
-      t.style.borderColor = isError ? "rgba(185, 28, 28, 1)" : "rgba(55, 65, 81, 1)";
+      // Dynamic Island colors
+      t.style.backgroundColor = isError ? "rgba(159, 18, 57, 0.85)" : "rgba(15, 23, 42, 0.85)";
+      t.style.borderColor = isError ? "rgba(225, 29, 72, 0.3)" : "rgba(255, 255, 255, 0.1)";
       
       void t.offsetWidth; 
       t.classList.add('toast-visible');
@@ -220,7 +305,7 @@
       const assignment = document.getElementById('selectAssignment').value;
       
       if (!classroom || !assignment) {
-        showToast('❌ กรุณาเลือกห้องและชิ้นงานให้ครบถ้วน', true);
+        showToast('⚠️ กรุณาเลือกห้องและชิ้นงานให้ครบถ้วน', true);
         return;
       }
 
@@ -231,7 +316,7 @@
       fetchBtn.disabled = true;
       fetchBtn.innerText = '⏳ กำลังดึงข้อมูล...';
       showTable(tableContainer);
-      tbody.innerHTML = `<tr><td colspan="5" class="text-center py-12 text-gray-500 font-medium animate-pulse text-xl">กำลังโหลดข้อมูลนักเรียนห้อง ${classroom}...</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="4" class="text-center py-20 text-indigo-500 font-bold animate-pulse text-xl md:text-3xl">กำลังโหลดข้อมูลห้อง ${classroom}...</td></tr>`;
 
       try {
         const response = await fetch(`${SCRIPT_URL}?action=getAdminView&classroom=${encodeURIComponent(classroom)}&assignment=${encodeURIComponent(assignment)}`);
@@ -240,68 +325,79 @@
 
         if (result && result.isOk && Array.isArray(result.data)) {
           if (result.data.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" class="text-center py-12 text-gray-500 font-semibold text-xl">⚠️ ไม่พบข้อมูลนักเรียนในห้องนี้</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="4" class="text-center py-16 text-slate-400 font-bold text-xl md:text-3xl">⚠️ ไม่พบข้อมูลนักเรียนในห้องนี้</td></tr>`;
             return;
           }
 
           const rowsHTML = result.data.map(std => {
-            let imgHTML = '<span class="text-gray-400 text-sm">ไม่มีรูป</span>';
-            let statusBadge = '<span class="bg-red-50 text-red-600 px-4 py-2 rounded-full text-sm font-bold border border-red-200">ยังไม่ส่ง</span>';
+            let imgHTML = '<span class="text-slate-400 text-sm md:text-base bg-slate-100/50 px-3 md:px-4 py-1.5 md:py-2 rounded-full border border-slate-200">ไม่มีรูป</span>';
             
-            const sub = std.submission; // ดึงออบเจ็กต์การส่งงานจากคีย์ submission
+            let statusBadge = '<span class="bg-rose-50/80 text-rose-600 px-3 py-1 md:px-4 md:py-1.5 rounded-full text-sm md:text-base font-bold border border-rose-200 shadow-sm whitespace-nowrap backdrop-blur-md">ยังไม่ส่ง</span>';
+            
+            const sub = std.submission; 
 
             if (sub) {
-              let lateBadge = sub.isLate ? '<span class="block text-xs text-amber-600 font-bold bg-amber-50 px-2 py-0.5 rounded border border-amber-200 mt-1">ส่งล่าช้า</span>' : '';
+              let lateBadge = sub.isLate ? '<span class="text-xs md:text-sm text-amber-700 font-bold bg-amber-100/80 px-2 py-1 md:px-3 rounded-md border border-amber-300 whitespace-nowrap shadow-sm backdrop-blur-md">ส่งล่าช้า</span>' : '';
+              
               statusBadge = `
-                <div class="flex flex-col items-center gap-1">
-                  <span class="bg-green-50 text-green-700 px-4 py-2 rounded-full text-sm font-bold border border-green-200">ส่งแล้ว</span>
-                  <span class="text-xs text-gray-500 font-mono">${sub.date || ''}</span>
-                  ${lateBadge}
-                </div>`;
+                <span class="bg-emerald-50/80 text-emerald-700 px-3 py-1 md:px-4 md:py-1.5 rounded-full text-sm md:text-base font-bold border border-emerald-200 shadow-sm whitespace-nowrap backdrop-blur-md">ส่งแล้ว</span>
+                <span class="text-xs md:text-sm text-slate-500 font-semibold">${sub.date || ''}</span>
+                ${lateBadge}
+              `;
               
               const rawImgUrl = (sub.imgLink && sub.imgLink !== '-') ? sub.imgLink : sub.link;
               const directImgUrl = getDirectImgUrl(rawImgUrl);
 
               if(directImgUrl) {
+                // ปุ่มไอคอนรูปภาพ (Fallback)
+                const fallbackBtn = `<a href=&quot;${rawImgUrl}&quot; target=&quot;_blank&quot; class=&quot;inline-flex items-center justify-center gap-1.5 bg-white/60 text-indigo-600 hover:bg-white/90 border border-white px-3 py-1.5 md:px-4 md:py-2 rounded-xl transition-all shadow-sm font-bold text-sm md:text-base whitespace-nowrap backdrop-blur-md&quot;><svg xmlns=&quot;http://www.w3.org/2000/svg&quot; class=&quot;w-5 h-5&quot; fill=&quot;none&quot; viewBox=&quot;0 0 24 24&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot;><path stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot; d=&quot;M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z&quot; /></svg></a>`;
+
                 imgHTML = `
-                  <a href="${rawImgUrl}" target="_blank" class="flex justify-center">
-                    <img src="${directImgUrl}" loading="lazy" class="img-preview" title="คลิกเพื่อเปิดดูขนาดเต็ม" onerror="this.onerror=null; this.outerHTML='<a href=&quot;${rawImgUrl}&quot; target=&quot;_blank&quot; class=&quot;text-blue-600 underline text-sm font-semibold hover:text-blue-800&quot;>เปิดดูรูปผลงาน</a>';">
-                  </a>`;
+                  <div class="flex justify-center">
+                    <a href="${rawImgUrl}" target="_blank">
+                      <img src="${directImgUrl}" loading="lazy" class="img-preview" title="คลิกเพื่อเปิดดูขนาดเต็ม" onerror="this.onerror=null; this.outerHTML='${fallbackBtn}';">
+                    </a>
+                  </div>`;
               }
             }
 
             let currentScore = (sub && sub.score !== undefined && sub.score !== null && sub.score !== '-' && sub.score !== '') ? sub.score : '';
 
+            // ใช้ hover:bg-white/40 เพื่อให้แถวตอนชี้เมาส์ดูเป็นกระจก
             return `
-              <tr class="hover:bg-blue-50/50 transition-colors duration-200">
-                <td class="py-5 px-6 text-center font-bold text-gray-700 text-xl">${std.number}</td>
-                <td class="py-5 px-6 font-semibold text-gray-800">${std.name}</td>
-                <td class="py-5 px-6 text-center">${statusBadge}</td>
-                <td class="py-5 px-6 text-center">${imgHTML}</td>
-                <td class="py-5 px-6">
-                  <div class="flex items-center justify-start gap-3">
-                    <input type="number" class="hw-input !py-3 !px-4 !w-28 text-center font-bold text-blue-700 text-xl border-2 border-gray-200" value="${currentScore}" placeholder="-">
-                    <button data-class="${classroom}" data-number="${std.number}" data-name="${std.name}" data-assignment="${assignment}" onclick="saveScore(this)" class="btn-tactile bg-blue-600 hover:bg-blue-700 text-white px-6 py-3.5 rounded-xl text-base font-bold shadow-sm min-w-[100px]">
-                      บันทึก
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            `;
+            <tr class="hover:bg-white/40 transition-colors duration-300">
+              <td class="py-4 md:py-6 px-2 md:px-4 text-center font-extrabold text-slate-800 text-xl md:text-3xl">${std.number}</td>
+              <td class="py-4 md:py-6 px-2 md:px-4">
+                <div class="font-bold text-slate-800 text-lg md:text-2xl">${std.name}</div>
+                <div class="mt-2 flex flex-wrap items-center gap-2">
+                  ${statusBadge}
+                </div>
+              </td>
+              <td class="py-4 md:py-6 px-2 md:px-4 text-center align-middle">${imgHTML}</td>
+              <td class="py-4 md:py-6 px-2 md:px-4">
+                <div class="flex items-center justify-start gap-2 md:gap-4">
+                  <input type="number" class="hw-input !bg-white/60 !py-2.5 !px-3 md:!py-3 md:!px-4 !w-24 md:!w-32 text-center font-bold text-indigo-700 text-xl md:text-3xl" value="${currentScore}" placeholder="-">
+                  <button data-class="${classroom}" data-number="${std.number}" data-name="${std.name}" data-assignment="${assignment}" onclick="saveScore(this)" class="btn-primary px-4 py-2.5 md:px-6 md:py-3.5 text-base md:text-xl font-bold min-w-[90px] md:min-w-[120px] whitespace-nowrap">
+                    บันทึก
+                  </button>
+                </div>
+              </td>
+            </tr>
+          `;
           }).join(''); 
 
           tbody.innerHTML = rowsHTML; 
           showToast(`✅ โหลดข้อมูลสำเร็จแล้วครับ!`);
         } else {
-          tbody.innerHTML = `<tr><td colspan="5" class="text-center py-12 text-amber-600 font-bold text-xl">⚠️ ${result?.error || 'เกิดข้อผิดพลาดในการโหลดข้อมูล'}</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="4" class="text-center py-16 text-amber-600 font-bold text-lg md:text-2xl">⚠️ ${result?.error || 'เกิดข้อผิดพลาดในการโหลดข้อมูล'}</td></tr>`;
           showToast(`❌ ${result?.error || 'โหลดข้อมูลไม่สำเร็จ'}`, true);
         }
       } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-12 text-red-500 font-bold text-xl">❌ เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center py-16 text-rose-500 font-bold text-lg md:text-2xl">❌ เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง</td></tr>`;
         showToast('❌ ไม่สามารถดึงข้อมูลจากเซิร์ฟเวอร์ได้', true);
       } finally {
         fetchBtn.disabled = false;
-        fetchBtn.innerText = '🔍 ดึงตารางตรวจงาน';
+        fetchBtn.innerHTML = 'ตรวจสอบชิ้นงาน';
       }
     }
 
@@ -316,13 +412,13 @@
 
       if(score.trim() === '') {
         showToast('⚠️ กรุณากรอกคะแนนก่อนบันทึก', true);
+        scoreInput.focus();
         return;
       }
       
       const originalText = btn.innerText;
       btn.innerText = '⏳...';
       btn.disabled = true;
-      btn.classList.add('opacity-80'); 
 
       try {
         const response = await fetch(SCRIPT_URL, {
@@ -345,23 +441,20 @@
         const result = await response.json();
         if(result && result.isOk) {
           showToast(`🎉 บันทึกคะแนนเลขที่ ${number} สำเร็จ!`);
-          btn.classList.replace('bg-blue-600', 'bg-emerald-500');
-          btn.classList.replace('hover:bg-blue-700', 'hover:bg-emerald-600');
+          btn.style.background = 'linear-gradient(135deg, #059669 0%, #10b981 100%)';
           btn.innerText = '✔ สำเร็จ';
           setTimeout(() => {
-            btn.classList.replace('bg-emerald-500', 'bg-blue-600');
-            btn.classList.replace('hover:bg-emerald-600', 'hover:bg-blue-700');
+            btn.style.background = '';
             btn.innerText = originalText;
             btn.disabled = false;
-            btn.classList.remove('opacity-80');
           }, 1500);
         } else {
           showToast('❌ บันทึกไม่สำเร็จ: ' + (result?.error || 'เกิดข้อผิดพลาด'), true);
-          btn.innerText = originalText; btn.disabled = false; btn.classList.remove('opacity-80');
+          btn.innerText = originalText; btn.disabled = false;
         }
       } catch (e) {
         showToast('❌ การเชื่อมต่อล้มเหลว', true);
-        btn.innerText = originalText; btn.disabled = false; btn.classList.remove('opacity-80');
+        btn.innerText = originalText; btn.disabled = false;
       }
     }
   </script>
